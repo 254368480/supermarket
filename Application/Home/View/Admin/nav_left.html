@@ -1,0 +1,33 @@
+<div id="left">
+    <div id="leftMenus">
+        <if condition="($nav eq 0)">
+            <dl id="submenu">
+                <dt><a class="ico1" id="submenuTitle" href="javascript:;">商品</a></dt>
+                <dd><a <if condition="($sub_nav eq 0)">class="selected"</if> href="/index.php/Home/admin/viewgoods" >商品管理</a></dd>
+                <dd><a <if condition="($sub_nav eq 1)">class="selected"</if> href="/index.php/Home/admin/addgoods" >商品添加</a></dd>
+                <dd><a <if condition="($sub_nav eq 2)">class="selected"</if> href="/index.php/Home/admin/drgoods" >导入商品</a></dd>
+            </dl>
+        </if>
+        <if condition="($nav eq 1)">
+            <dl id="submenu">
+                <dt><a class="ico1" id="submenuTitle" href="javascript:;">人员</a></dt>
+                <dd><a <if condition="($sub_nav eq 0)">class="selected"</if> href="/index.php/Home/admin/viewuser" >人员管理</a></dd>
+                <dd><a <if condition="($sub_nav eq 1)">class="selected"</if> href="/index.php/Home/admin/adduser" >人员添加</a></dd>
+            </dl>
+        </if>
+        <if condition="($nav eq 2)">
+            <dl id="submenu">
+                <dt><a class="ico1" id="submenuTitle" href="javascript:;">收银</a></dt>
+                <dd><a <if condition="($sub_nav eq 0)">class="selected"</if> href="/index.php/Home/admin/viewlogs" >收银记录</a></dd>
+                <dd><a <if condition="($sub_nav eq 1)">class="selected"</if> href="/index.php/Home/admin/download" >导出记录</a></dd>
+            </dl>
+        </if>
+        <if condition="($nav eq 3)">
+            <dl id="submenu">
+                <dt><a class="ico1" id="submenuTitle" href="javascript:;">门店</a></dt>
+                <dd><a <if condition="($sub_nav eq 0)">class="selected"</if> href="/index.php/Home/admin/viewshops" >门店管理</a></dd>
+                <dd><a <if condition="($sub_nav eq 1)">class="selected"</if> href="/index.php/Home/admin/addshops" >门店添加</a></dd>
+            </dl>
+        </if>
+    </div>
+</div>

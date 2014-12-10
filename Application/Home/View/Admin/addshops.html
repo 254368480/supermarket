@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{$title}</title>
+    <link rel="stylesheet" href="/public/admin/css/style.css">
+    <script src="/public/admin/js/jquery.js"></script>
+    <script src="/public/admin/js/admin.js"></script>
+    <script>
+        function checkform(){
+            var name = document.form.shop_name;
+            var num = document.form.shop_num;
+
+
+            if(!checkinput(name, 'req', '请输入门店名称！')){
+                return false;
+            }
+            if(!checkinput(num, 'req', '请输入门店编号！')){
+                return false;
+            }
+        }
+    </script>
+</head>
+
+<body class="admin_body">
+<include file="header" />
+<div class="content">
+    <include file="nav_left" />
+    <div id="right">
+        <form name="form" method="post" action="/index.php/Home/admin/addshops" onsubmit="return checkform()">
+        <table class="goods_table">
+            <tr><td>门店编号：</td><td><input type="text" name="shop_num" required="required"></td></tr>
+            <tr><td>门店名称：</td><td><input type="text" name="shop_name" required="required"></td></tr>
+            <tr><td colspan="2"><input style="margin-left: 50px;margin-right: 10px;margin-top: 10px;" class="formbtn" type="submit" name="dosubmit" value="提交"><input class="formbtn" type="reset" value="重置"></td></tr>
+        </table>
+        </form>
+    </div>
+</div>
+</body>
+</html>
