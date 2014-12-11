@@ -438,7 +438,7 @@ class AdminController extends Controller {
             $User = M("User");
             $user = $User->where(array('user_name' => $name, 'password' => $pass, 'permission' => 9))->find();
             if(!empty($user)){
-                session('isLogin', 1);
+                session('isLogin', 2);
                 session('uid', $user['uid']);
                 session('user_name', $user['user_name']);
                 session('tel', $user['tel']);
@@ -449,7 +449,7 @@ class AdminController extends Controller {
             }
 
         }else {
-            if(session('?isLogin') && session('isLogin') == 1){
+            if(session('?isLogin') && session('isLogin') == 2){
                 redirect('/index.php/Home/admin/index', 0, '页面跳转中...');
             }else {
                 $this->assign('title', '登陆_零乐购商超');
@@ -482,7 +482,7 @@ class AdminController extends Controller {
     }
 
     function _isLogin(){
-        if(!session('?isLogin') || session('isLogin') != 1 || session('permission') != 9){
+        if(!session('?isLogin') || session('isLogin') != 2 || session('permission') != 9){
             $this->error('请先登录', '/index.php/home/admin/login', 1);
         }
         return true;
@@ -507,6 +507,7 @@ class AdminController extends Controller {
             'fontttf'  => '5.ttf'
         );
         $Verify = new \Think\Verify($config);
+        ob_clean();
         $Verify->entry();
     }
 

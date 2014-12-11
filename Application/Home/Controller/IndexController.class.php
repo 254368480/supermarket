@@ -261,6 +261,7 @@ class IndexController extends Controller {
             'fontttf'  => '5.ttf'
         );
         $Verify = new \Think\Verify($config);
+        ob_clean();
         $Verify->entry();
     }
 
