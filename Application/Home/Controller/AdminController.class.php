@@ -518,6 +518,7 @@ class AdminController extends Controller {
     }
 
     function exportexcel($data=array(),$title=array(),$filename='report'){
+        header("Content-type: text/html; charset=gb2312");
         header("Content-type:application/octet-stream");
         header("Accept-Ranges:bytes");
         header("Content-type:application/vnd.ms-excel");

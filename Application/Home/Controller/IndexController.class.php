@@ -134,6 +134,7 @@ class IndexController extends Controller {
 
             $cid = $Logs->add($data);
             $Logs_goods = M('Cashlogs_goods');
+            $Goods = M('Goods');
             for($i=0;$i<$len;$i++){
                 $data = array(
                     'cid' => $cid,
@@ -144,7 +145,9 @@ class IndexController extends Controller {
                     'goods_int' => $goods_int[$i],
                     'goods_num' => $goods_num[$i],
                 );
-            $Logs_goods->add($data);
+                $Logs_goods->add($data);
+                //从库存中减去
+                $Goods->where("goods_number = $goods_number[$i]")->setDec('goods_stock',$goods_num[$i]);
             }
             session('goods', null); //清除商品缓存
             $this->success('支付完成！', "/index.php/home/index/toprint?id=$cid");
