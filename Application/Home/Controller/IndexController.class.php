@@ -7,6 +7,7 @@ class IndexController extends Controller {
         $this->_isLogin();
         if(IS_GET && I('get.act') == 're'){
             session('goods', null);
+            session('money', null);
         }
         $Goods = M('Goods');
         if(IS_POST){
@@ -49,6 +50,7 @@ class IndexController extends Controller {
                 'mtotal' => $mtotal,
                 'itotal' => $itotal,
                 'goods' => $goods,
+                'money' => session('money') ? session('money') : null,
                 'user_where' => session('user_where'),
         );
         $this->assign($arr);
@@ -72,6 +74,16 @@ class IndexController extends Controller {
                 }
                 session('goods', $sgoods);
             }
+        }
+        exit;
+    }
+
+    //异步记录支付金额
+    public function editmoney(){
+        $this->_isLogin();
+        if(IS_POST){
+            $money = I('post.money', 0, 'intval');
+            session('money', $money);
         }
         exit;
     }
@@ -113,6 +125,9 @@ class IndexController extends Controller {
             $user_where = session('user_where');
             $len = count($goods_number);
 
+            if(empty($buyer))$this->error('请输入购买用户！');
+            if($money == '')$this->error('请输入实收金额！');
+
             $Shops = M('Shops');
             $shop = $Shops->where("shop_name = '$user_where'")->find();
             //生成流水号 门店编号+日期+今天的第几次交易
@@ -144,12 +159,18 @@ class IndexController extends Controller {
                     'goods_money' => $goods_money[$i],
                     'goods_int' => $goods_int[$i],
                     'goods_num' => $goods_num[$i],
+                    'user_name' => $user_name,
+                    'user_where' => $user_where,
+                    'buyer' => $buyer,
+                    'time' => time(),
+
                 );
                 $Logs_goods->add($data);
                 //从库存中减去
                 $Goods->where("goods_number = $goods_number[$i]")->setDec('goods_stock',$goods_num[$i]);
             }
             session('goods', null); //清除商品缓存
+            session('money', null);
             $this->success('支付完成！', "/index.php/home/index/toprint?id=$cid");
         }
     }

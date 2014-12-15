@@ -13,6 +13,9 @@
 <div class="content">
     <include file="nav_left" />
     <div id="right">
+        <form method="post" style="margin-top: 30px;margin-left: 50px" action="/index.php/Home/admin/viewgoods">
+            <input type="text" name="goods_number" placeholder="输入商品编号"><input type="submit" name="dosubmit" value="搜索">
+        </form>
         <table class="goods_view_table goods_table" style="width: 100%" border="1" cellpadding="0" cellspacing="0">
             <tr>
                 <th>商品编号</th><th>商品名称</th><th>商品价格</th><th>商品积分</th><th>商品库存</th><th>操作</th>

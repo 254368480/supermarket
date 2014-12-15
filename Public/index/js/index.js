@@ -21,6 +21,11 @@ $(document).ready(function(){
         });
     });
 
+    $('#sure').click(function(){
+        var money = $('#money').text();
+        $.post("/index.php/Home/index/editmoney", {money: money});
+    });
+
 });
 function payint(obj){
     $('span.buyer').siblings('input.formbtn').hide();

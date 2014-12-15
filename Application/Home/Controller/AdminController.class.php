@@ -18,7 +18,9 @@ class AdminController extends Controller {
             $goods_money = I('post.goods_money', 0, 'intval');
             $goods_int = I('post.goods_int', 0, 'intval');
             $goods_stock = I('post.goods_stock', 0, 'intval');
-
+            $Goods = M("Goods");
+            if($Goods->where("goods_number = '$goods_number'")->count())$this->error("商品编号已经存在，添加失败！");
+            if($Goods->where("goods_name = '$goods_name'")->count())$this->error("商品名称已经存在，添加失败！");
             $data = array(
                 'goods_number' => $goods_number,
                 'goods_name' => $goods_name,
@@ -26,7 +28,6 @@ class AdminController extends Controller {
                 'goods_int' => $goods_int,
                 'goods_stock' => $goods_stock
             );
-            $Goods = M("Goods");
             $Goods->add($data);
             $this->success('添加成功', '/index.php/Home/admin/addgoods');
         }else {
@@ -44,10 +45,17 @@ class AdminController extends Controller {
     public function viewgoods(){
         $this->_isLogin();
         $Goods = M("Goods");
-        $count = $Goods->count();
+        $where = '';
+        if(IS_POST){
+            $goods_number = I('post.goods_number', '');
+            if (!empty($goods_number)) {
+                $where = "goods_number = $goods_number";
+            }
+        }
+        $count = $Goods->count($where);
         $Page = new \Think\Page($count,20);
         $show = $Page->show();// 分页显示输出
-        $goods = $Goods->order('gid')->limit($Page->firstRow.','.$Page->listRows)->select();
+        $goods = $Goods->where($where)->order('goods_number desc')->limit($Page->firstRow.','.$Page->listRows)->select();
         $arr = array(
             'title' => '商品管理_零乐购商超',
             'nav' => '0',
@@ -78,7 +86,7 @@ class AdminController extends Controller {
                     'goods_int' => $goods_int,
                     'goods_stock' => $goods_stock
                 );
-                $Goods->where("gid = $gid")->save($data); // 根据条件更新记录
+                if(!$Goods->where("gid = $gid")->save($data))$this->error("商品编号或者商品名称已经存在，修改失败！"); // 根据条件更新记录
                 $this->success("修改成功！", '/index.php/Home/admin/viewgoods');
             }else{
                 $this->error("未定义操作！");
@@ -137,6 +145,7 @@ class AdminController extends Controller {
                 'tel' => $tel,
             );
             $User = M('User');
+            if($User->where("user_name = '$user_name'")->count())$this->error("该员工姓名已经存在，添加失败！");
             $User->add($data);
             $this->success("添加成功！");
         }else {
@@ -189,7 +198,7 @@ class AdminController extends Controller {
                 if(!empty($password)){
                     $data['password'] = md5($password);
                 }
-                $User->where("uid = $uid")->save($data); // 根据条件更新记录
+                if(!$User->where("uid = $uid")->save($data))$this->error("员工姓名已经存在，修改失败！"); // 根据条件更新记录
                 $this->success("修改成功！", '/index.php/Home/admin/viewuser');
             }else{
                 $this->error("未定义操作！");
@@ -236,12 +245,15 @@ class AdminController extends Controller {
         if(IS_POST){
             $shop_name = I('post.shop_name');
             $shop_num = I('post.shop_num');
-
+            $shop_address = I('post.shop_address');
             $data = array(
                 'shop_name' => $shop_name,
-                'shop_num' => $shop_num
+                'shop_num' => $shop_num,
+                'shop_address' => $shop_address
             );
             $Shops = M('Shops');
+            if($Shops->where("shop_name = '$shop_name'")->count())$this->error("门店名重复，添加失败！");
+            if($Shops->where("shop_num = '$shop_num'")->count())$this->error("门店编号重复，添加失败！");
             $Shops->add($data);
             $this->success("添加成功！");
         }else {
@@ -282,13 +294,15 @@ class AdminController extends Controller {
             $id = I('post.id', 0, 'intval');
             $shop_name = I('post.shop_name');
             $shop_num = I('post.shop_num');
+            $shop_address = I('post.shop_address');
 
             if($Shops->where("id = $id")->count()){
                 $data = array(
                     'shop_name' => $shop_name,
                     'shop_num' => $shop_num,
+                    'shop_address' => $shop_address
                 );
-                $Shops->where("id = $id")->save($data); // 根据条件更新记录
+                if(!$Shops->where("id = $id")->save($data))$this->error("门店名称或者编号重复，修改失败！"); // 根据条件更新记录
                 $this->success("修改成功！", '/index.php/Home/admin/viewshops');
             }else{
                 $this->error("未定义操作！");
@@ -421,9 +435,37 @@ class AdminController extends Controller {
 
     public function download(){
         $this->_isLogin();
-        $Logsgoods = M('cashlogs_goods');
-        $goods = $Logsgoods->order('goods_number asc')->select();
-        $this->exportexcel($goods);
+        if(IS_POST) {
+            $start = strtotime(I('post.start'));
+            $end = strtotime(I('post.end'));
+            if(empty($start))$this->error('请输入起始时间！');
+            if(empty($start))$this->error('请输入结束时间！');
+            if($start > $end)$this->error('起始时间不能大于结束时间！');
+            if($start == $end){
+                $Y = date('Y', $start);
+                $m = date('m', $start);
+                $d = date('d', $start);
+                $end = mktime(23,59,59,$m,$d,$Y);
+            }else{
+                if($start > $end)$this->error('起始时间不能大于结束时间！');
+            }
+            $where = "time > $start AND time < $end";
+            $Logsgoods = M('cashlogs_goods');
+            $goods = $Logsgoods->where($where)->order('goods_number asc')->select();
+            foreach($goods as $key => $value){
+                $goods[$key]['time'] = date('Y-m-d H:i', $value['time']);
+            }
+            $this->exportexcel($goods);
+        }else{
+            $arr = array(
+                'title' => '导入商品_零乐购商超',
+                'nav' => '2',
+                'sub_nav' => '1',
+                'user_name' => session('user_name'),
+            );
+            $this->assign($arr);
+            $this->display();
+        }
     }
 
     public function login(){
