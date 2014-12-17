@@ -134,6 +134,7 @@ class AdminController extends Controller {
         if(IS_POST){
             $user_name = I('post.user_name');
             $password = I('post.password');
+            $user_where = I('post.user_where');
             $tel = I('post.tel');
 
             if(strlen($password) < 6){
@@ -142,6 +143,7 @@ class AdminController extends Controller {
             $data = array(
                 'user_name' => $user_name,
                 'password' => md5($password),
+                'user_where' => $user_where,
                 'tel' => $tel,
             );
             $User = M('User');
@@ -187,12 +189,14 @@ class AdminController extends Controller {
             $user_name = I('post.user_name');
             $password = I('post.password', null);
             $tel = I('post.tel');
+            $user_where = I('post.user_where');
             if($password != '' && strlen($password) < 6 ){
                 $this->error('登陆密码不能小于6位！');
             }
             if($User->where("uid = $uid")->count()){
                 $data = array(
                     'user_name' => $user_name,
+                    'user_where' => $user_where,
                     'tel' => $tel,
                 );
                 if(!empty($password)){
@@ -388,6 +392,11 @@ class AdminController extends Controller {
         }else{
             $this->error('未定义操作！');
         }
+    }
+
+    public function editlog(){
+        $this->_isLogin();
+
     }
 
     public function drgoods(){

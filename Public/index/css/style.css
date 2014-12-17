@@ -56,3 +56,11 @@ a{text-decoration: none}
 .print_body th{
     text-align: left;
 }
+.payint h1{
+    height: 50px;
+    line-height: 50px;
+}
+.payint td{
+    height: 20px;
+    line-height: 20px;
+}
