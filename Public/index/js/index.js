@@ -27,12 +27,8 @@ $(document).ready(function(){
     });
 
 });
-function payint(){
-    var user_name = $('#buyer').val();
-    var password = $('#password').val();
-    var int = $('input.itotal').val();
-    var to_user = $('#to_user').val();
-    $.post("http://www.linglegou.com/index.php?act=payint", {user_name: user_name, int:int, to_user:to_user, password:password}, function(){
-        alert();
-    });
+function payint(obj){
+    $('span.buyer').siblings('input.formbtn').hide();
+    var buyer = $('span.buyer').find('input').val();
+    $('span.buyer').html('<input type="hidden" name="buyer" value="'+buyer+'"><input type="hidden" name="buyer" value="'+buyer+'" form="cash_form">'+buyer);
 }

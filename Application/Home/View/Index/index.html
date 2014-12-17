@@ -50,15 +50,11 @@
             找    零：<span id="zmoney"></span><br>
         </div>
         <div class="clear"></div>
-        <div class="payint">
-            <h1>支付积分</h1>
-            <table>
-                <tr><td align="left">用户名：</td><td><span class="buyer"><input id="buyer" type="text" name="buyer" required="required"></span></td></tr>
-                <tr><td align="left">密码：</td><td><input id="password" type="password" name="password" required="required"></td></tr>
-                <input type="hidden" id="to_user" name="to_user" value="tianwei">
-                <tr><td colspan="2"><input type="button" class="formbtn" value="支付积分" onclick="payint()"><span id="state"></span></td></tr>
-            </table>
-        </div>
+        <form method="post" action="/index.php/Home/index/payint" target="_blank">
+            用户名：<span class="buyer"><input type="text" name="buyer" required="required"></span>
+            <input type="hidden" name="itotal" value="{$itotal}">
+            <input type="submit" class="formbtn" value="支付积分" onclick="payint(this)">
+        </form>
         <input type="submit" style="margin-top: 10px" class="formbtn" value="打印小票" form="cash_form">
     </div>
 </body>
