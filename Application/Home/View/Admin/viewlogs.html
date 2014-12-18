@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{$title}</title>
+    <link rel="stylesheet" href="/Public/admin/css/style.css">
+    <script src="/Public/admin/js/jquery.js"></script>
+    <script src="/Public/admin/js/admin.js"></script>
+</head>
+
+<body class="admin_body">
+<include file="header" />
+<div class="content">
+    <include file="nav_left" />
+    <div id="right">
+        <table class="goods_view_table goods_table" style="width: 100%" border="1" cellpadding="0" cellspacing="0">
+            <tr>
+                <th>流水号</th><th>收银员</th><th>门店</th><th>收银时间</th><th>交易金额</th><th>交易积分</th><th>实收金额</th><th>买家</th><th>操作</th>
+            </tr>
+            <foreach name="logs" item="value" >
+            <tr>
+                <td align="center">{$value.logs_number}</td>
+                <td align="center">{$value.user_name}</td>
+                <td align="center">{$value.user_where}</td>
+                <td align="center">{$value.time|date="Y-m-d",###}</td>
+                <td align="center">{$value.mtotal}</td>
+                <td align="center">{$value.itotal}</td>
+                <td align="center">{$value.money}</td>
+                <td align="center">{$value.buyer}</td>
+                <td align="center"><a href="/index.php/Home/admin/viewlogsgoods/id/{$value.id}">查看详细</a></td>
+            </tr>
+            </foreach>
+        </table>
+        <div class="page">
+            {$page}
+        </div>
+    </div>
+</div>
+</body>
+</html>

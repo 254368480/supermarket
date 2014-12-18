@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{$title}</title>
+    <link rel="stylesheet" href="/Public/admin/css/style.css">
+    <script src="/Public/admin/js/jquery.js"></script>
+    <script src="/Public/admin/js/admin.js"></script>
+</head>
+
+<body class="admin_body">
+<include file="header" />
+<div class="content">
+    <include file="nav_left" />
+    <div id="right">
+        <form method="post" style="margin-top: 30px;margin-left: 50px" action="/index.php/Home/admin/viewgoods">
+            <input type="text" name="goods_number" placeholder="输入商品编号"><input type="submit" name="dosubmit" value="搜索">
+        </form>
+        <table class="goods_view_table goods_table" style="width: 100%" border="1" cellpadding="0" cellspacing="0">
+            <tr>
+                <th>商品编号</th><th>商品名称</th><th>商品价格</th><th>商品积分</th><th>商品库存</th><th>操作</th>
+            </tr>
+            <foreach name="goods" item="value" >
+            <tr>
+                <td align="center">{$value.goods_number}</td>
+                <td align="center">{$value.goods_name}</td>
+                <td align="center">{$value.goods_money}</td>
+                <td align="center">{$value.goods_int}</td>
+                <td align="center">{$value.goods_stock}</td>
+                <td align="center"><a href="/index.php/Home/Admin/editgoods/gid/{$value.gid}">编辑</a> | <a href="/index.php/Home/Admin/delgoods/gid/{$value.gid}">删除</a></td>
+            </tr>
+            </foreach>
+        </table>
+        <div class="page">
+            {$page}
+        </div>
+    </div>
+</div>
+</body>
+</html>

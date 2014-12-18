@@ -1,0 +1,11 @@
+<div id="head">
+    <div id="logo"><a href="/index.php"><img src="templates/style/images/logo.gif" alt="LOGO"></a></div>
+    <div id="menu"><span>您好，<strong>{$user_name}</strong> <a href="/index.php/Home/admin/logout">[退出]</a></span></div>
+    <ul id="nav">
+        <li><a <if condition="($nav eq 0)">class="link actived"<else />class="link"</if> href="/index.php/Home/admin/viewgoods">商品</a></li>
+        <li><a <if condition="($nav eq 1)">class="link actived"<else />class="link"</if> href="/index.php/Home/admin/viewuser">人员</a></li>
+        <li><a <if condition="($nav eq 2)">class="link actived"<else />class="link"</if> href="/index.php/Home/admin/viewlogs">收银</a></li>
+        <li><a <if condition="($nav eq 3)">class="link actived"<else />class="link"</if> href="/index.php/Home/admin/viewshops">门店</a></li>
+    </ul>
+    <div id="headBg"></div>
+</div>
