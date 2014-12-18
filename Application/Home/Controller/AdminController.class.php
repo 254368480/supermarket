@@ -250,12 +250,10 @@ class AdminController extends Controller {
             $shop_name = I('post.shop_name');
             $shop_num = I('post.shop_num');
             $shop_address = I('post.shop_address');
-            $shop_user = I('post.shop_user');
             $data = array(
                 'shop_name' => $shop_name,
                 'shop_num' => $shop_num,
-                'shop_address' => $shop_address,
-                'shop_user' => $shop_user
+                'shop_address' => $shop_address
             );
             $Shops = M('Shops');
             if($Shops->where("shop_name = '$shop_name'")->count())$this->error("门店名重复，添加失败！");
@@ -301,13 +299,12 @@ class AdminController extends Controller {
             $shop_name = I('post.shop_name');
             $shop_num = I('post.shop_num');
             $shop_address = I('post.shop_address');
-            $shop_user = I('post.shop_user');
+
             if($Shops->where("id = $id")->count()){
                 $data = array(
                     'shop_name' => $shop_name,
                     'shop_num' => $shop_num,
-                    'shop_address' => $shop_address,
-                    'shop_user' => $shop_user
+                    'shop_address' => $shop_address
                 );
                 if(!$Shops->where("id = $id")->save($data))$this->error("门店名称或者编号重复，修改失败！"); // 根据条件更新记录
                 $this->success("修改成功！", '/index.php/Home/admin/viewshops');
@@ -353,38 +350,16 @@ class AdminController extends Controller {
 
     public function viewlogs(){
         $this->_isLogin();
-        if(IS_POST){
-            $user = I('post.user');
-            $shop_name = I('post.shop_name');
-            $start = I('post.start', '', 'strtotime');
-            $end = I('post.end', '', 'strtotime');
-            if($start > $end)$this->error('起始时间不能大于结束时间，请重新输入！');
-            if($start && $end)$end = $end + 60*60*24-1;
-            $where = array(
-                !empty($user) ? "user_name = '$user'" : "1=1",
-                !empty($shop_name) ? "user_where = '$shop_name'" : "1=1",
-                $start && $end ? "time > $start AND time < $end" : "1=1"
-            );
-        }else {
-            $Y = date('Y', time());
-            $m = date('m', time());
-            $d = date('d', time());
-            $start = mktime(0, 0, 0, $m, $d, $Y);
-            $end = mktime(23, 59, 59, $m, $d, $Y);
-            $where = " time > $start AND time < $end ";
-        }
         $Logs = M("Cashlogs");
-        $count = $Logs->where($where)->count();
+        $count = $Logs->count();
         $Page = new \Think\Page($count,20);
         $show = $Page->show();// 分页显示输出
-        $logs = $Logs->where($where)->order('logs_number asc')->limit($Page->firstRow.','.$Page->listRows)->select();
-        $time = date('Y-m-d', time());
+        $logs = $Logs->order('logs_number asc')->limit($Page->firstRow.','.$Page->listRows)->select();
         $arr = array(
             'title' => '收银记录_零乐购商超',
             'nav' => '2',
             'sub_nav' => '0',
             'user_name' => session('user_name'),
-            'time' => $time,
             'logs' => $logs,
             'page' => $show,
         );
@@ -421,34 +396,7 @@ class AdminController extends Controller {
 
     public function editlog(){
         $this->_isLogin();
-        $logGoods_mod = M('cashlogs_goods');
-        if(IS_POST){
-            $act = I('post.act');
-            if(isset($act) && $act == 'backgoods'){
-                $id = I('post.id');
-                $num = I('post.num', 0, 'intval');
-                if(!$num)$this->error('请输入退货数量！');
-                $goods = $logGoods_mod->where("id = '$id'")->find();
-                if($goods['goods_num'] < $num)$this->error('退货数量超出售出数量，请重新输入！');
-                $data = array();
-            }else {
-                $log_number = I('post.log_number');
-                $log_mod = M('cashlogs');
-                $log = $log_mod->where("logs_number = '$log_number'")->find();
-                if (empty($log)) $this->error('该收银记录不存在！');
-                $goods = $logGoods_mod->where("logs_number = '$log_number'")->select();
-            }
-        }
-        $arr = array(
-            'title' => '退票_零乐购商超',
-            'nav' => '2',
-            'sub_nav' => '2',
-            'user_name' => session('user_name'),
-            'log' => $log,
-            'goods' => $goods
-        );
-        $this->assign($arr);
-        $this->display();
+
     }
 
     public function drgoods(){
