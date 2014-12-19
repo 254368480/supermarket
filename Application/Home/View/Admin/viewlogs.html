@@ -4,8 +4,23 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>{$title}</title>
     <link rel="stylesheet" href="/Public/admin/css/style.css">
-    <script src="/Public/admin/js/jquery.js"></script>
+    <link rel="stylesheet" href="/Public/date/style.css">
+    <script src="/Public/date/jquery.js"></script>
+    <script src="/Public/date/date.js" charset="utf-8"></script>
     <script src="/Public/admin/js/admin.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("input.date").manhuaDate({
+                Event: "click", //可选
+                Left: 0, //弹出时间停靠的左边位置
+                Top: -16, //弹出时间停靠的顶部边位置
+                fuhao: "-", //日期连接符默认为-
+                isTime: false, //是否开启时间值默认为false
+                beginY: 1949, //年份的开始默认为1949
+                endY: 2100//年份的结束默认为2049
+            });
+        });
+    </script>
 </head>
 
 <body class="admin_body">
@@ -13,6 +28,15 @@
 <div class="content">
     <include file="nav_left" />
     <div id="right">
+        <div class="search">
+            <form method="post">
+                <input type="text" name="user" placeholder="请输入员工姓名">
+                <input type="text" name="shop_name" placeholder="请输入门店名称">
+                日期：<input class="date" type="text" name="start" placeholder="{$time}">
+                至：<input class="date" type="text" name="end" placeholder="{$time}">
+                <input type="submit" class="formbtn" value="搜索">
+            </form>
+        </div>
         <table class="goods_view_table goods_table" style="width: 100%" border="1" cellpadding="0" cellspacing="0">
             <tr>
                 <th>流水号</th><th>收银员</th><th>门店</th><th>收银时间</th><th>交易金额</th><th>交易积分</th><th>实收金额</th><th>买家</th><th>操作</th>

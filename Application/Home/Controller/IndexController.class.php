@@ -93,14 +93,15 @@ class IndexController extends Controller {
         if(IS_POST){
             $buyer = I('post.buyer');
             $itotal = I('post.itotal');
-            $account = 'tianwei';
-            $touser = 'tianwei'; //接受积分的账号
+            $user_where = session('user_where');
+            $shop_mod = M('Shops');
+            $touser = $shop_mod->where("shop_name = '$user_where'")->getField('shop_user');
+            if(empty($touser))$this->error('该门店收积分账号不存在！');
             $arr = array(
                 'title' => '支付积分_零乐购商超',
                 'user_name' => session('user_name'),
                 'buyer' => $buyer,
                 'itotal' => $itotal,
-                'account' => $account,
                 'touser' => $touser
             );
             $this->assign($arr);
