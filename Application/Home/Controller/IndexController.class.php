@@ -52,6 +52,7 @@ class IndexController extends Controller {
                 'goods' => $goods,
                 'money' => session('money') ? session('money') : null,
                 'user_where' => session('user_where'),
+                'permission' => session('permission'),
         );
         $this->assign($arr);
         $this->display();
@@ -93,14 +94,15 @@ class IndexController extends Controller {
         if(IS_POST){
             $buyer = I('post.buyer');
             $itotal = I('post.itotal');
-            $account = 'tianwei';
-            $touser = 'tianwei'; //接受积分的账号
+            $user_where = session('user_where');
+            $shop_mod = M('Shops');
+            $touser = $shop_mod->where("shop_name = '$user_where'")->getField('shop_user');
+            if(empty($touser))$this->error('该门店收积分账号不存在！');
             $arr = array(
                 'title' => '支付积分_零乐购商超',
                 'user_name' => session('user_name'),
                 'buyer' => $buyer,
                 'itotal' => $itotal,
-                'account' => $account,
                 'touser' => $touser
             );
             $this->assign($arr);
@@ -143,8 +145,8 @@ class IndexController extends Controller {
                 'itotal' => $itotal,
                 'mtotal' => $mtotal,
                 'money' => $money,
-                'zmoney' => $zmoney,
                 'buyer' => $buyer,
+                'state' => $money == 0 ? 1 : 0,
             );
 
             $cid = $Logs->add($data);
@@ -203,7 +205,7 @@ class IndexController extends Controller {
     public function _logsnumber($numb){
         $time = date('Ymd',time());
         $Logs = M('Cashlogs');
-        $n = $Logs->where('date_format(from_UNIXTIME(`time`),"%Y%m%d") = '.$time)->count() + 1;
+        $n = $Logs->where('date_format(from_UNIXTIME(`time`),"%Y%m%d") = '.$time.' AND state !=2 AND state != 3')->count() + 1;
         $nums = "000".$n;
         $nums = substr($nums, -4);
         $number = $numb.$time.$nums;
@@ -211,6 +213,7 @@ class IndexController extends Controller {
     }
 
     public function login(){
+        if(strpos($_SERVER["HTTP_USER_AGENT"],"MSIE"))$this->error("不支持IE浏览器，请使用火狐，谷歌等浏览器");
         if(IS_POST){
             $name = $this->_checkinput($_POST['user_name']);
             $pass = md5($this->_checkinput($_POST['password']));
@@ -231,6 +234,7 @@ class IndexController extends Controller {
                 session('user_name', $user['user_name']);
                 session('tel', $user['tel']);
                 session('user_where', $user_where);
+                session('permission', $user['permission']);
                 redirect('/index.php/Home/index/index', 0, '页面跳转中...');
             }else{
                 $this->error('账号或者密码输入错误！');

@@ -9,14 +9,15 @@
 
 </head>
 
-<body class="admin_body">
-<include file="header" />
+<body style="background-color:#000;width: 1000px;margin:auto">
+
 <div class="content">
-    <include file="nav_left" />
+
     <div id="right">
         <div class="body">
-            <form action="" method="post">
+            <form action="" method="post" class="searchform">
                 <input type="text" required="required" name="log_number" placeholder="小票流水号"><input class="formbtn" type="submit" value="搜索">
+                <p style="color:#AAA;">操作说明：先输入流水号查找交易明细，然后勾选一个要退的单品（选择多个也只能退最后一个勾选的），输入数量后点击退单品。要退整单直接点击退整单</p>
             </form>
             <if condition="(!empty($log))">
                 <table width="1000" style="margin-top: 20px">
@@ -25,7 +26,7 @@
                     </tr>
                 </table>
                 <form method="post">
-                    <table class="goods_view_table goods_table" style="width: 100%" border="1" cellpadding="0" cellspacing="0">
+                    <table class="goods_view_table goods_table" style="width: 100%;margin-left: 0" border="1" cellpadding="0" cellspacing="0">
                         <tr>
                             <th>商品编号</th><th>商品名称</th><th>商品金额</th><th>商品积分</th><th>商品数量</th><th>金额小计</th><th>积分小计</th>
                         </tr>
@@ -41,16 +42,68 @@
                             </tr>
                         </foreach>
                     </table>
-                    <div style="margin-left: 50px;margin-top: 20px">
-                        <div style="float: left;">
+                    <if condition="$hideact eq 0">
+                    <div style="margin-top: 20px">
+                        <div style="float: left;margin-left: 10px">
                             <input type="hidden" name="act" value="backgoods">
+                            <input type="hidden" name="log_number" value="{$log.logs_number}">
                             <input type="text" name="num" placeholder="请输入退货数量" required="required">
                             <input type="submit" value="退单品" class="formbtn">
                         </div>
-                        <a style="display: block;text-align: center;float: left;margin-left: 5px" class="formbtn" href="">退整单</a>
+                        <a style="display: block;text-align: center;float: left;margin-left: 5px" class="formbtn" href="/index.php/Home/admin/editlog/op/backlog/id/{$log.id}">退整单</a>
                     </div>
+                    </if>
                 </form>
+            </if>
+            <if condition="(!empty($backgoods))">
+                <div class="clear"></div>
+                <h1 class="h1">已退商品</h1>
+                <table class="goods_view_table goods_table" style="width: 100%;margin-left: 0" border="1" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <th>商品编号</th><th>商品名称</th><th>商品金额</th><th>商品积分</th><th>商品数量</th><th>金额小计</th><th>积分小计</th>
+                    </tr>
+                    <?php $money = 0;$int = 0;?>
+                    <foreach name="backgoods" item="value" >
+                        <?php $money = $money + $value['goods_num']*$value['goods_money'];?>
+                        <?php $int = $int + $value['goods_num']*$value['goods_int'];?>
+                        <tr>
+                            <td align="center">{$value.goods_number}</td>
+                            <td align="center">{$value.goods_name}</td>
+                            <td align="center">{$value.goods_money}</td>
+                            <td align="center">{$value.goods_int}</td>
+                            <td align="center">{$value.goods_num}</td>
+                            <td align="center">{$value['goods_num']*$value['goods_money']}</td>
+                            <td align="center">{$value['goods_num']*$value['goods_int']}</td>
+                        </tr>
+                    </foreach>
+                </table>
+                <div class="backmoney">
+                    <form method="post" action="/index.php/Home/admin/backend">
+                        <input type="hidden" name="logs_number" value="{$log.logs_number}">
+                        <div>总计金额：<input type="text" name="money" value="{-$money}"></div>
+                        <div>总计积分：<input type="text" name="int" value="{-$int}"></div>
+                        <div>
+                            退分密码：<input id="password" type="text" name="password" form="form"  placeholder="请输入登陆密码"><br>
+                            <input id="sure" class="formbtn" type="button" value="退分"><input class="formbtn" type="submit" value="结算">
+                        </div>
+                    </form>
+                </div>
+                <div class="clear"></div>
 
+                <div class="payint" id="paybox">
+                    <div class="head">退分操作<span id="close" style="float: right;cursor: pointer">X</span></div>
+                    <table>
+                        <form method="post" target="_blank" action="http://www.linglegou.com/index.php?act=backint">
+                            <tbody>
+                            <input type="hidden" name="touser" value="{$touser}">
+                            <tr><td>退分账号：</td><td><input name="shop_user" type="hidden" value="{$shop_user}">{$shop_user}</td></tr>
+                            <tr><td>买家账号：</td><td><input name="buyer" type="hidden" value="{$log.buyer}" required="required">{$log.buyer}</td></tr>
+                            <tr><td>所退积分：</td><td><input name="int" type="hidden" value="{-$int}" required="required">{-$int}</td></tr>
+                            <tr><td style="margin-top: 5px" colspan="2" align="center"><input style="margin-top: 5px" class="formbtn" name="dosubmit" value="确认支付" type="submit" style="margin-right: 10px"></td></tr>
+                            </tbody>
+                        </form>
+                    </table>
+                </div>
             </if>
         </div>
     </div>

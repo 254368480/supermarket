@@ -136,6 +136,7 @@ class AdminController extends Controller {
             $password = I('post.password');
             $user_where = I('post.user_where');
             $tel = I('post.tel');
+            $permission = I('post.permission');
 
             if(strlen($password) < 6){
                 $this->error('密码不能小于6位！');
@@ -144,6 +145,7 @@ class AdminController extends Controller {
                 'user_name' => $user_name,
                 'password' => md5($password),
                 'user_where' => $user_where,
+                'permission' => $permission,
                 'tel' => $tel,
             );
             $User = M('User');
@@ -168,12 +170,14 @@ class AdminController extends Controller {
         $count = $User->count();
         $Page = new \Think\Page($count,20);
         $show = $Page->show();// 分页显示输出
-        $users = $User->where('permission = 0')->order('uid')->limit($Page->firstRow.','.$Page->listRows)->select();
+        $users = $User->where('permission != 9')->order('uid')->limit($Page->firstRow.','.$Page->listRows)->select();
+        $permission = array('否', '是');
         $arr = array(
             'title' => '人员管理_零乐购商超',
             'nav' => '1',
             'sub_nav' => '0',
             'user_name' => session('user_name'),
+            'permission' => $permission,
             'users' => $users,
             'page' => $show,
         );
@@ -190,6 +194,7 @@ class AdminController extends Controller {
             $password = I('post.password', null);
             $tel = I('post.tel');
             $user_where = I('post.user_where');
+            $permission = I('post.permission');
             if($password != '' && strlen($password) < 6 ){
                 $this->error('登陆密码不能小于6位！');
             }
@@ -198,6 +203,7 @@ class AdminController extends Controller {
                     'user_name' => $user_name,
                     'user_where' => $user_where,
                     'tel' => $tel,
+                    'permission' => $permission
                 );
                 if(!empty($password)){
                     $data['password'] = md5($password);
@@ -250,10 +256,12 @@ class AdminController extends Controller {
             $shop_name = I('post.shop_name');
             $shop_num = I('post.shop_num');
             $shop_address = I('post.shop_address');
+            $shop_user = I('post.shop_user');
             $data = array(
                 'shop_name' => $shop_name,
                 'shop_num' => $shop_num,
-                'shop_address' => $shop_address
+                'shop_address' => $shop_address,
+                'shop_user' => $shop_user
             );
             $Shops = M('Shops');
             if($Shops->where("shop_name = '$shop_name'")->count())$this->error("门店名重复，添加失败！");
@@ -299,12 +307,13 @@ class AdminController extends Controller {
             $shop_name = I('post.shop_name');
             $shop_num = I('post.shop_num');
             $shop_address = I('post.shop_address');
-
+            $shop_user = I('post.shop_user');
             if($Shops->where("id = $id")->count()){
                 $data = array(
                     'shop_name' => $shop_name,
                     'shop_num' => $shop_num,
-                    'shop_address' => $shop_address
+                    'shop_address' => $shop_address,
+                    'shop_user' => $shop_user
                 );
                 if(!$Shops->where("id = $id")->save($data))$this->error("门店名称或者编号重复，修改失败！"); // 根据条件更新记录
                 $this->success("修改成功！", '/index.php/Home/admin/viewshops');
@@ -350,18 +359,44 @@ class AdminController extends Controller {
 
     public function viewlogs(){
         $this->_isLogin();
+        if(IS_POST){
+            $user = I('post.user');
+            $shop_name = I('post.shop_name');
+            $state = I('post.state');
+            $start = I('post.start', '', 'strtotime');
+            $end = I('post.end', '', 'strtotime');
+            if($start > $end)$this->error('起始时间不能大于结束时间，请重新输入！');
+            if($start && $end)$end = $end + 60*60*24-1;
+            $where = array(
+                !empty($user) ? "user_name = '$user'" : "1=1",
+                !empty($shop_name) ? "user_where = '$shop_name'" : "1=1",
+                $state != '' ? "state = '$state'" : "1=1",
+                $start && $end ? "time > $start AND time < $end" : "1=1"
+            );
+        }else {
+            $Y = date('Y', time());
+            $m = date('m', time());
+            $d = date('d', time());
+            $start = mktime(0, 0, 0, $m, $d, $Y);
+            $end = mktime(23, 59, 59, $m, $d, $Y);
+            $where = " time > $start AND time < $end ";
+        }
         $Logs = M("Cashlogs");
-        $count = $Logs->count();
+        $count = $Logs->where($where)->count();
         $Page = new \Think\Page($count,20);
         $show = $Page->show();// 分页显示输出
-        $logs = $Logs->order('logs_number asc')->limit($Page->firstRow.','.$Page->listRows)->select();
+        $logs = $Logs->where($where)->order('logs_number asc')->limit($Page->firstRow.','.$Page->listRows)->select();
+        $time = date('Y-m-d', time());
+        $state = array('现金交易', '刷卡交易', '部分退货', '整单退货');
         $arr = array(
             'title' => '收银记录_零乐购商超',
             'nav' => '2',
             'sub_nav' => '0',
             'user_name' => session('user_name'),
+            'time' => $time,
             'logs' => $logs,
             'page' => $show,
+            'state' => $state
         );
         $this->assign($arr);
         $this->display();
@@ -395,8 +430,129 @@ class AdminController extends Controller {
     }
 
     public function editlog(){
-        $this->_isLogin();
-
+        if(!session('isLogin') || session('permission') < 1)$this->error("权限不够");
+        $logGoods_mod = M('cashlogs_goods');
+        $log_mod = M('cashlogs');
+        if(IS_GET && I('get.op') == 'backlog'){
+            $id = I('get.id');
+            $log = $log_mod->where("id = '$id' AND state != 2 AND state != 3")->find();
+            if(!$log)$this->error("该交易无法退货！");
+            if($log_mod->where("logs_number = 'TH$log[logs_number]'")->count())$this->error("该单已经退过了！");
+            $data = array(
+                'logs_number' => "TH".$log['logs_number'],
+                'user_name' => session('user_name'),
+                'user_where' => $log['user_where'],
+                'time' => time(),
+                'itotal' => "-$log[itotal]",
+                'mtotal' => "-$log[mtotal]",
+                'money' => 0,
+                'buyer' => $log['buyer'],
+                'state' => 3,
+            );
+            $cid = $log_mod->add($data);
+            if(!$cid)$this->error("操作失败，请重试！");
+            $goods = $logGoods_mod->where("cid = '$id'")->select();
+            foreach($goods as $value){
+                $data = array(
+                    'cid' => $cid,
+                    'logs_number' => "TH".$log['logs_number'],
+                    'goods_number' => $value['goods_number'],
+                    'goods_name' => $value['goods_name'],
+                    'goods_money' => $value['goods_money'],
+                    'goods_int' => $value['goods_int'],
+                    'goods_num' => "-$value[goods_num]",
+                    'user_name' => session('user_name'),
+                    'user_where' => $value['user_where'],
+                    'buyer' => $log['buyer'],
+                    'time' => time(),
+                );
+                $logGoods_mod->add($data);
+                //加回库存
+                $goods_mod = M('goods');
+                $goods_mod->where("goods_number = '$value[goods_number]'")->setInc('goods_stock', $value['goods_num']);
+                //
+                $goods = $logGoods_mod->where("logs_number = '$log[los_number]")->select();
+                $backgoods = $logGoods_mod->where("logs_number = 'TH$log[los_number]'")->select();
+                $shop_mod = M('shops');
+                $shop_user = $shop_mod->where("shop_name = '$log[user_where]'")->getField('shop_user');
+                $hideact = 1;
+            }
+        }
+        if(IS_POST){
+            $act = I('post.act');
+            if(isset($act) && $act == 'backgoods'){
+                $id = I('post.id');
+                $num = I('post.num', 0, 'intval');
+                if($num <= 0)$this->error('请输入退货数量！');
+                $goods = $logGoods_mod->where("id = '$id'")->find();
+                if(empty($goods))$this->error("请选择要退的商品！");
+                if($goods['goods_num'] < $num)$this->error('退货数量超出售出数量，请重新输入！');
+                if($logGoods_mod->where("logs_number = 'TH$goods[logs_number]' AND goods_number = '$goods[goods_number]'")->count())$this->error('该商品已经退过了！');
+                $log = $log_mod->where("logs_number = 'TH$goods[logs_number]'")->find();
+                if($log){
+                    $cid = $log['id'];
+                    $money = $num * $goods['goods_money'];
+                    $int = $num * $goods['goods_int'];
+                    $log_mod->where("logs_number = 'TH$goods[logs_number]'")->setDec('mtotal',$money);
+                    $log_mod->where("logs_number = 'TH$goods[logs_number]'")->setDec('itotal',$int);
+                }else {
+                    $data = array(
+                        'logs_number' => "TH".$goods['logs_number'],
+                        'user_name' => session('user_name'),
+                        'user_where' => $goods['user_where'],
+                        'time' => time(),
+                        'itotal' => -$goods['goods_int']*$num,
+                        'mtotal' => -$goods['goods_money']*$num,
+                        'money' => 0,
+                        'buyer' => $goods['buyer'],
+                        'state' => 2,
+                    );
+                    $cid = $log_mod->add($data);
+                    if (!$cid) $this->error("操作失败，请重试！");
+                }
+                $data = array(
+                    'cid' => $cid,
+                    'logs_number' => "TH".$goods['logs_number'],
+                    'goods_number' => $goods['goods_number'],
+                    'goods_name' => $goods['goods_name'],
+                    'goods_money' => $goods['goods_money'],
+                    'goods_int' => $goods['goods_int'],
+                    'goods_num' => "-$num",
+                    'user_name' => session('user_name'),
+                    'user_where' => $goods['user_where'],
+                    'buyer' => $goods['buyer'],
+                    'time' => time(),
+                );
+                $logGoods_mod->add($data);
+                //加回库存
+                $goods_mod = M('goods');
+                $goods_mod->where("goods_number = '$goods[goods_number]'")->setInc('goods_stock', 1);
+            }
+            $log_number = I('post.log_number');
+            $log_mod = M('cashlogs');
+            $log = $log_mod->where("logs_number = '$log_number' AND state !=2 AND state !=3")->find();
+            if(empty($log)) $this->error('该收银记录不存在！');
+            if($log_mod->where("logs_number = 'TH$log_number' AND state = 3 AND money != 0")->count())$this->error('此单已经全部退货完毕！');
+            if($log_mod->where("logs_number = 'TH$log_number' AND state = 2 AND money != 0")->count())$this->error('此单已经退货过了，请不要重复退货！');
+            if($log_mod->where("logs_number = 'TH$log_number' AND state = 3")->count())$hideact = 1;
+            $goods = $logGoods_mod->where("logs_number = '$log_number'")->select();
+            $backgoods = $logGoods_mod->where("logs_number = 'TH$log_number'")->select();
+            $shop_mod = M('shops');
+            $shop_user = $shop_mod->where("shop_name = '$log[user_where]'")->getField('shop_user');
+        }
+        $arr = array(
+            'title' => '退票_零乐购商超',
+            'nav' => '2',
+            'sub_nav' => '2',
+            'user_name' => session('user_name'),
+            'log' => $log,
+            'goods' => $goods,
+            'backgoods' => $backgoods,
+            'shop_user' => $shop_user,
+            'hideact' => isset($hideact) ? $hideact : 0,
+        );
+        $this->assign($arr);
+        $this->display();
     }
 
     public function drgoods(){
@@ -477,7 +633,37 @@ class AdminController extends Controller {
         }
     }
 
+    public function backend(){
+        if(!session('isLogin') || session('permission') < 1)$this->error('权限不够');
+        $money = -I('post.money', 0);
+        $logs_number = I('post.logs_number');
+
+        $log_mod = M('cashlogs');
+        if($log_mod->where("logs_number = 'TH$logs_number'")->setField('money',$money))$this->success('操作成功！');
+        else $this->error('操作失败！');
+    }
+
+    public function checkpass(){
+        if(!session('isLogin') || session('permission') < 1){
+            echo 0;
+            exit;
+        }
+        $pass = MD5(I('post.password'));
+        $user_mod = M('user');
+        $user_name = session('user_name');
+        $password = $user_mod->where("user_name = '$user_name'")->getField('password');
+        if($pass == $password){
+            echo 1;
+            exit;
+        }else{
+            echo 0;
+            exit;
+        }
+        exit;
+    }
+
     public function login(){
+        if(strpos($_SERVER["HTTP_USER_AGENT"],"MSIE"))$this->error("不支持IE浏览器，请使用火狐，谷歌等浏览器");
         if(!empty($_POST['dosubmit'])){
             $name = $this->_checkinput($_POST['user_name']);
             $pass = md5($this->_checkinput($_POST['password']));
