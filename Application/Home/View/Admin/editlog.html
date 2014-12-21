@@ -80,11 +80,12 @@
                 <div class="backmoney">
                     <form method="post" action="/index.php/Home/admin/backend">
                         <input type="hidden" name="logs_number" value="{$log.logs_number}">
-                        <div>总计金额：<input type="text" name="money" value="{-$money}"></div>
                         <div>总计积分：<input type="text" name="int" value="{-$int}"></div>
+                        退分密码：<input id="password" type="password" name="password" form="form"  placeholder="请输入登陆密码"><br>
+                        <input style="margin-top: 5px;margin-bottom: 5px" id="sure" class="formbtn" type="button" value="退分">
                         <div>
-                            退分密码：<input id="password" type="text" name="password" form="form"  placeholder="请输入登陆密码"><br>
-                            <input id="sure" class="formbtn" type="button" value="退分"><input class="formbtn" type="submit" value="结算">
+                            <div>总计金额：<input type="text" name="money" value="{-$money}"></div>
+                            <input class="formbtn" type="submit" value="结算">
                         </div>
                     </form>
                 </div>
