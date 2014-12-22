@@ -373,6 +373,7 @@ class AdminController extends Controller {
                 $state != '' ? "state = '$state'" : "1=1",
                 $start && $end ? "time > $start AND time < $end" : "1=1"
             );
+
         }else {
             $Y = date('Y', time());
             $m = date('m', time());
@@ -580,7 +581,7 @@ class AdminController extends Controller {
             $data_values = substr($data_values,0,-1); //去掉最后一个逗号
             fclose($handle); //关闭指针
             $Model = new Model();
-            $query = $Model->execute("INSERT INTO `supermarket`.`super_goods` (`gid`, `goods_number`, `goods_name`, `goods_money`, `goods_int`, `goods_stock`) values ".$data_values);//批量插入数据表中
+            $query = $Model->execute("INSERT INTO `super_goods` (`gid`, `goods_number`, `goods_name`, `goods_money`, `goods_int`, `goods_stock`) values ".$data_values);//批量插入数据表中
             if($query){
                 echo '导入成功！';
             }else{
@@ -620,7 +621,8 @@ class AdminController extends Controller {
             foreach($goods as $key => $value){
                 $goods[$key]['time'] = date('Y-m-d H:i', $value['time']);
             }
-            $this->exportexcel($goods);
+            $title = array('商品ID', '小票ID', '小票流水号', '商品编号', '商品名称', '商品单价', '商品积分', '商品数量', '收银员', '交易门店', '买家', '时间');
+            $this->exportexcel($goods, $title);
         }else{
             $arr = array(
                 'title' => '导入商品_零乐购商超',
@@ -755,7 +757,7 @@ class AdminController extends Controller {
     }
 
     function exportexcel($data=array(),$title=array(),$filename='report'){
-        header("Content-type: text/html; charset=gb2312");
+        header("Content-type: text/html; charset=uft-8");
         header("Content-type:application/octet-stream");
         header("Accept-Ranges:bytes");
         header("Content-type:application/vnd.ms-excel");
@@ -765,7 +767,7 @@ class AdminController extends Controller {
         //导出xls 开始
         if (!empty($title)){
             foreach ($title as $k => $v) {
-                $title[$k]=iconv("UTF-8", "GB2312",$v);
+                $title[$k]=iconv("UTF-8", "UTF-8",$v);
             }
             $title= implode("\t", $title);
             echo "$title\n";
@@ -773,7 +775,7 @@ class AdminController extends Controller {
         if (!empty($data)){
             foreach($data as $key=>$val){
                 foreach ($val as $ck => $cv) {
-                    $data[$key][$ck]=iconv("UTF-8", "GB2312", $cv);
+                    $data[$key][$ck]=iconv("UTF-8", "UTF-8", $cv);
                 }
                 $data[$key]=implode("\t", $data[$key]);
 
