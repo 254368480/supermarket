@@ -29,20 +29,22 @@
                     <th width="400px">商品名称</th><th>商品价格</th><th>商品积分</th><th width="80px">商品数量</th><th>金额小计</th><th>积分小计</th>
                 </tr>
                 <foreach name="goods" item="value">
-                <tr>
-                    <input class="goods_number" type="hidden" name="goods_number[]" value="{$value.goods_number}">
-                    <input type="hidden" name="goods_name[]" value="{$value.goods_name}">
-                    <input type="hidden" name="goods_money[]" value="{$value.goods_money}">
-                    <input type="hidden" name="goods_int[]" value="{$value.goods_int}">
-                    <input type="hidden" name="mcount[]" value="{$value.mcount}">
-                    <input type="hidden" name="icount[]" value="{$value.icount}">
-                    <td align="center">{$value.goods_name}</td>
-                    <td align="center" class="goods_money">{$value.goods_money}</td>
-                    <td align="center" class="goods_int">{$value.goods_int}</td>
-                    <td align="center" class="goods_num"><input style="width: 30px;background-color: #e6f1fc;border: none;text-align: center" type="text" name="goods_num[]" value="{$value.goods_num}" required="required"></td>
-                    <td align="center" class="mcount">{$value.mcount}</td>
-                    <td align="center" class="icount">{$value.icount}</td>
-                </tr>
+                    <if condition="$value.goods_num gt 0">
+                        <tr>
+                            <input class="goods_number" type="hidden" name="goods_number[]" value="{$value.goods_number}">
+                            <input type="hidden" name="goods_name[]" value="{$value.goods_name}">
+                            <input type="hidden" name="goods_money[]" value="{$value.goods_money}">
+                            <input type="hidden" name="goods_int[]" value="{$value.goods_int}">
+                            <input type="hidden" name="mcount[]" value="{$value.mcount}">
+                            <input type="hidden" name="icount[]" value="{$value.icount}">
+                            <td align="center">{$value.goods_name}</td>
+                            <td align="center" class="goods_money">{$value.goods_money}</td>
+                            <td align="center" class="goods_int">{$value.goods_int}</td>
+                            <td align="center" class="goods_num"><input style="width: 30px;background-color: #e6f1fc;border: none;text-align: center" type="text" name="goods_num[]" value="{$value.goods_num}" required="required"></td>
+                            <td align="center" class="mcount">{$value.mcount}</td>
+                            <td align="center" class="icount">{$value.icount}</td>
+                        </tr>
+                    </if>
                 </foreach>
             </table>
         </form>
