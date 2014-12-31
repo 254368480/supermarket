@@ -18,24 +18,33 @@ class AdminController extends Controller {
             $goods_money = I('post.goods_money', 0, 'intval');
             $goods_int = I('post.goods_int', 0, 'intval');
             $goods_stock = I('post.goods_stock', 0, 'intval');
+            $goods_where = I('post.goods_where');
+            $goods_where = !empty($goods_where) ? $goods_where : session('where');
             $Goods = M("Goods");
-            if($Goods->where("goods_number = '$goods_number'")->count())$this->error("商品编号已经存在，添加失败！");
-            if($Goods->where("goods_name = '$goods_name'")->count())$this->error("商品名称已经存在，添加失败！");
+            if($Goods->where("goods_number = '$goods_number' AND goods_where = '$goods_where'")->count())$this->error("商品编号已经存在，添加失败！");
+            if($Goods->where("goods_name = '$goods_name' AND goods_where = '$goods_where'")->count())$this->error("商品名称已经存在，添加失败！");
             $data = array(
                 'goods_number' => $goods_number,
                 'goods_name' => $goods_name,
                 'goods_money' => $goods_money,
                 'goods_int' => $goods_int,
-                'goods_stock' => $goods_stock
+                'goods_stock' => $goods_stock,
+                'goods_where' => $goods_where
             );
             $Goods->add($data);
             $this->success('添加成功', '/index.php/Home/admin/addgoods');
         }else {
+            if(session('permission') == 9) {
+                $shop_mod = M('shops');
+                $shops = $shop_mod->select();
+            }
             $arr = array(
                 'title' => '添加商品_零乐购商超',
                 'nav' => '0',
                 'sub_nav' => '1',
+                'shops' => isset($shops) ? $shops : array(),
                 'user_name' => session('user_name'),
+                'permission' => session('permission'),
             );
             $this->assign($arr);
             $this->display();
@@ -45,12 +54,18 @@ class AdminController extends Controller {
     public function viewgoods(){
         $this->_isLogin();
         $Goods = M("Goods");
-        $where = '';
+        $goods_where = session('where');
+        if(session('permission') == 9 ){
+            $where = '1=1';
+        }else{
+            $where = "goods_where = '$goods_where'";
+        }
         if(IS_POST){
             $goods_number = I('post.goods_number', '');
             if (!empty($goods_number)) {
-                $where = "goods_number = $goods_number";
+                $where.= " AND goods_number = $goods_number";
             }
+            $this->assign('goods_number', $goods_number);
         }
         $count = $Goods->count($where);
         $Page = new \Think\Page($count,20);
@@ -78,13 +93,17 @@ class AdminController extends Controller {
             $goods_money = I('post.goods_money', 0, 'intval');
             $goods_int = I('post.goods_int', 0, 'intval');
             $goods_stock = I('post.goods_stock', 0, 'intval');
+            $goods_where = I('post.goods_where');
+            $goods_where = !empty($goods_where) ? $goods_where : session('where');
+
             if($Goods->where("gid = $gid")->count()){
                 $data = array(
                     'goods_number' => $goods_number,
                     'goods_name' => $goods_name,
                     'goods_money' => $goods_money,
                     'goods_int' => $goods_int,
-                    'goods_stock' => $goods_stock
+                    'goods_stock' => $goods_stock,
+                    'goods_where' => $goods_where,
                 );
                 if(!$Goods->where("gid = $gid")->save($data))$this->error("商品编号或者商品名称已经存在，修改失败！"); // 根据条件更新记录
                 $this->success("修改成功！", '/index.php/Home/admin/viewgoods');
@@ -101,6 +120,7 @@ class AdminController extends Controller {
                     'sub_nav' => '0',
                     'user_name' => session('user_name'),
                     'goods' => $goods,
+                    'permission' => session('permission'),
                 );
                 $this->assign($arr);
                 $this->display();
@@ -131,16 +151,19 @@ class AdminController extends Controller {
 
     public function adduser(){
         $this->_isLogin();
+        if(session('permission') != 9)$this->error('无此权限！');
         if(IS_POST){
             $user_name = I('post.user_name');
             $password = I('post.password');
             $user_where = I('post.user_where');
             $tel = I('post.tel');
             $permission = I('post.permission');
+            $admin = I('post.admin');
 
             if(strlen($password) < 6){
                 $this->error('密码不能小于6位！');
             }
+            $permission = !empty($admin) ? 2 : $permission;
             $data = array(
                 'user_name' => $user_name,
                 'password' => md5($password),
@@ -153,10 +176,13 @@ class AdminController extends Controller {
             $User->add($data);
             $this->success("添加成功！");
         }else {
+            $shop_mod = M('shops');
+            $shops = $shop_mod->select();
             $arr = array(
                 'title' => '添加收银员_零乐购商超',
                 'nav' => '1',
                 'sub_nav' => '1',
+                'shops' => $shops,
                 'user_name' => session('user_name'),
             );
             $this->assign($arr);
@@ -166,12 +192,14 @@ class AdminController extends Controller {
 
     public function viewuser(){
         $this->_isLogin();
+        if(session('permission') != 9)$this->error('无此权限！');
         $User = M("User");
         $count = $User->count();
         $Page = new \Think\Page($count,20);
         $show = $Page->show();// 分页显示输出
         $users = $User->where('permission != 9')->order('uid')->limit($Page->firstRow.','.$Page->listRows)->select();
-        $permission = array('否', '是');
+        $permission = array('否', '是', '是');
+        $admin = array('否', '否', '是');
         $arr = array(
             'title' => '人员管理_零乐购商超',
             'nav' => '1',
@@ -180,6 +208,7 @@ class AdminController extends Controller {
             'permission' => $permission,
             'users' => $users,
             'page' => $show,
+            'admin' => $admin
         );
         $this->assign($arr);
         $this->display();
@@ -187,6 +216,7 @@ class AdminController extends Controller {
 
     public function edituser(){
         $this->_isLogin();
+        if(session('permission') != 9)$this->error('无此权限！');
         $User = M("User");
         if(IS_POST){
             $uid = I('post.uid', 0, 'intval');
@@ -195,6 +225,8 @@ class AdminController extends Controller {
             $tel = I('post.tel');
             $user_where = I('post.user_where');
             $permission = I('post.permission');
+            $admin = I('post.admin');
+            $permission = !empty($admin) ? 2 : $permission;
             if($password != '' && strlen($password) < 6 ){
                 $this->error('登陆密码不能小于6位！');
             }
@@ -216,12 +248,15 @@ class AdminController extends Controller {
         }elseif(IS_GET){
             $uid = I('get.uid', 0, 'intval');
             $user = $User->where("uid = $uid")->find();
+            $shop_mod = M('shops');
+            $shops = $shop_mod->select();
             if(!empty($user)){
                 $arr = array(
                     'title' => '人员编辑_零乐购商超',
                     'nav' => '1',
                     'sub_nav' => '0',
                     'user_name' => session('user_name'),
+                    'shops' => $shops,
                     'user' => $user,
                 );
                 $this->assign($arr);
@@ -236,6 +271,7 @@ class AdminController extends Controller {
 
     public function deluser(){
         $this->_isLogin();
+        if(session('permission') != 9)$this->error('无此权限！');
         $User = M("User");
         if(IS_GET){
             $uid = I('get.uid', 0, 'intval');
@@ -252,6 +288,7 @@ class AdminController extends Controller {
 
     public function addshops(){
         $this->_isLogin();
+        if(session('permission') != 9)$this->error('无此权限！');
         if(IS_POST){
             $shop_name = I('post.shop_name');
             $shop_num = I('post.shop_num');
@@ -282,6 +319,7 @@ class AdminController extends Controller {
 
     public function viewshops(){
         $this->_isLogin();
+        if(session('permission') != 9)$this->error('无此权限！');
         $Shops = M("Shops");
         $count = $Shops->count();
         $Page = new \Think\Page($count,20);
@@ -301,6 +339,7 @@ class AdminController extends Controller {
 
     public function editshops(){
         $this->_isLogin();
+        if(session('permission') != 9)$this->error('无此权限！');
         $Shops = M("Shops");
         if(IS_POST){
             $id = I('post.id', 0, 'intval');
@@ -343,6 +382,7 @@ class AdminController extends Controller {
 
     public function delshops(){
         $this->_isLogin();
+        if(session('permission') != 9)$this->error('无此权限！');
         $Shops = M("Shops");
         if(IS_GET){
             $id = I('get.sid', 0, 'intval');
@@ -359,6 +399,7 @@ class AdminController extends Controller {
 
     public function viewlogs(){
         $this->_isLogin();
+        if(session('permission') != 9)$this->error('无此权限！');
         if(IS_POST){
             $user = I('post.user');
             $shop_name = I('post.shop_name');
@@ -373,7 +414,7 @@ class AdminController extends Controller {
                 $state != '' ? "state = '$state'" : "1=1",
                 $start && $end ? "time > $start AND time < $end" : "1=1"
             );
-
+            $this->assign($_POST);
         }else {
             $Y = date('Y', time());
             $m = date('m', time());
@@ -405,6 +446,7 @@ class AdminController extends Controller {
 
     public function viewlogsgoods(){
         $this->_isLogin();
+        if(session('permission') != 9)$this->error('无此权限！');
         $id = I('get.id', 0, 'intval');
         if($id){
             $Logs = M("Cashlogs");
@@ -432,6 +474,7 @@ class AdminController extends Controller {
 
     public function editlog(){
         if(!session('isLogin') || session('permission') < 1)$this->error("权限不够");
+
         $logGoods_mod = M('cashlogs_goods');
         $log_mod = M('cashlogs');
         if(IS_GET && I('get.op') == 'backlog'){
@@ -470,7 +513,7 @@ class AdminController extends Controller {
                 $logGoods_mod->add($data);
                 //加回库存
                 $goods_mod = M('goods');
-                $goods_mod->where("goods_number = '$value[goods_number]'")->setInc('goods_stock', $value['goods_num']);
+                $goods_mod->where("goods_number = '$value[goods_number]' AND goods_where = '$value[user_where]'")->setInc('goods_stock', $value['goods_num']);
                 //
                 $goods = $logGoods_mod->where("logs_number = '$log[los_number]")->select();
                 $backgoods = $logGoods_mod->where("logs_number = 'TH$log[los_number]'")->select();
@@ -527,7 +570,7 @@ class AdminController extends Controller {
                 $logGoods_mod->add($data);
                 //加回库存
                 $goods_mod = M('goods');
-                $goods_mod->where("goods_number = '$goods[goods_number]'")->setInc('goods_stock', 1);
+                $goods_mod->where("goods_number = '$goods[goods_number]' AND goods_where = '$goods[user_where]'")->setInc('goods_stock', $num);
             }
             $log_number = I('post.log_number');
             $log_mod = M('cashlogs');
@@ -558,6 +601,7 @@ class AdminController extends Controller {
 
     public function drgoods(){
         $this->_isLogin();
+        if(session('permission') != 9)$this->error('无此权限！');
         if(IS_POST){
             $filename = $_FILES['file']['tmp_name'];
             if (empty ($filename)) {
@@ -576,16 +620,17 @@ class AdminController extends Controller {
                 $goods_money = $result[$i][2];
                 $goods_int = $result[$i][3];
                 $goods_stock = $result[$i][4];
-                $data_values .= "('NULL','$goods_number','$goods_name','$goods_money','$goods_int','$goods_stock'),";
+                $goods_where = iconv('gb2312', 'utf-8', $result[$i][5]);
+                $data_values .= "('NULL','$goods_where','$goods_number','$goods_name','$goods_money','$goods_int','$goods_stock'),";
             }
             $data_values = substr($data_values,0,-1); //去掉最后一个逗号
             fclose($handle); //关闭指针
             $Model = new Model();
-            $query = $Model->execute("INSERT INTO `super_goods` (`gid`, `goods_number`, `goods_name`, `goods_money`, `goods_int`, `goods_stock`) values ".$data_values);//批量插入数据表中
+            $query = $Model->execute("INSERT INTO `super_goods` (`gid`, `goods_where`, `goods_number`, `goods_name`, `goods_money`, `goods_int`, `goods_stock`) values ".$data_values);//批量插入数据表中
             if($query){
-                echo '导入成功！';
+                $this->success('导入成功！');
             }else{
-                echo '导入失败！';
+                $this->error('导入失败！');
             }
         }else{
             $arr = array(
@@ -601,6 +646,8 @@ class AdminController extends Controller {
 
     public function download(){
         $this->_isLogin();
+        if(session('permission') != 9)$this->error('无此权限！');
+
         if(IS_POST) {
             $start = strtotime(I('post.start'));
             $end = strtotime(I('post.end'));
@@ -633,6 +680,14 @@ class AdminController extends Controller {
             $this->assign($arr);
             $this->display();
         }
+    }
+
+    public function downloadgoods(){
+        $this->_isLogin();
+        $goods_mod = M('goods');
+        $goods = $goods_mod->select();
+        $title = array('商品ID', '所属门店',  '商品编号', '商品名称', '商品单价', '商品积分', '商品库存');
+        $this->exportexcel($goods, $title);
     }
 
     public function backend(){
@@ -675,14 +730,20 @@ class AdminController extends Controller {
                 $this->error('验证码输入错误！');
             }
             $User = M("User");
-            $user = $User->where(array('user_name' => $name, 'password' => $pass, 'permission' => 9))->find();
+            $user = $User->where(array('user_name' => $name, 'password' => $pass, 'permission = 9 OR permission = 2'))->find();
+
             if(!empty($user)){
                 session('isLogin', 2);
                 session('uid', $user['uid']);
                 session('user_name', $user['user_name']);
                 session('tel', $user['tel']);
+                session('where', $user['user_where']);
                 session('permission', $user['permission']);
-                redirect('/index.php/Home/admin/index', 0, '页面跳转中...');
+                if($user['permission'] == 9) {
+                    redirect('/index.php/Home/admin/index', 0, '页面跳转中...');
+                }else{
+                    redirect('/index.php/Home/admin/viewgoods', 0, '页面跳转中...');
+                }
             }else{
                 $this->error('账号或者密码输入错误！');
             }
@@ -721,7 +782,8 @@ class AdminController extends Controller {
     }
 
     function _isLogin(){
-        if(!session('?isLogin') || session('isLogin') != 2 || session('permission') != 9){
+        $arr = array(2,9);
+        if(!session('?isLogin') || session('isLogin') != 2 || !in_array(session('permission'), $arr)){
             $this->error('请先登录', '/index.php/home/admin/login', 1);
         }
         return true;

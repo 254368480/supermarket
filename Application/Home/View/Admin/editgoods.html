@@ -50,11 +50,14 @@
         <form name="form" method="post" action="/index.php/Home/admin/editgoods" onsubmit="return checkform()">
         <table class="goods_table">
             <input type="hidden" name="gid" value="{$goods.gid}">
-            <tr><td>商品编号：</td><td><input type="text" name="goods_number" value="{$goods.goods_number}" required="required"></td></tr>
-            <tr><td>商品名称：</td><td><input type="text" name="goods_name" value="{$goods.goods_name}" required="required"></td></tr>
-            <tr><td>商品价格：</td><td><input type="text" name="goods_money" value="{$goods.goods_money}" required="required"></td></tr>
-            <tr><td>商品积分：</td><td><input type="text" name="goods_int" value="{$goods.goods_int}" required="required"></td></tr>
-            <tr><td>商品库存：</td><td><input type="text" name="goods_stock" value="{$goods.goods_stock}" required="required"></td></tr>
+            <tr><td>商品编号：</td><td><input class="form-control" type="text" name="goods_number" value="{$goods.goods_number}" required="required"></td></tr>
+            <tr><td>商品名称：</td><td><input class="form-control" type="text" name="goods_name" value="{$goods.goods_name}" required="required"></td></tr>
+            <tr><td>商品价格：</td><td><input class="form-control" type="text" name="goods_money" value="{$goods.goods_money}" required="required"></td></tr>
+            <tr><td>商品积分：</td><td><input class="form-control" type="text" name="goods_int" value="{$goods.goods_int}" required="required"></td></tr>
+            <tr><td>商品库存：</td><td><input class="form-control" type="text" name="goods_stock" value="{$goods.goods_stock}" required="required"></td></tr>
+            <if condition="($permission eq 9)">
+                <tr><td>所属门店：</td><td><input class="form-control" type="text" name="goods_where" value="{$goods.goods_where}" required="required"></td></tr>
+            </if>
             <tr><td colspan="2"><input style="margin-left: 50px;margin-right: 10px;margin-top: 10px;" class="formbtn" type="submit" name="dosubmit" value="提交"><input class="formbtn" type="reset" value="重置"></td></tr>
         </table>
         </form>

@@ -26,21 +26,34 @@
 <div class="content">
     <include file="nav_left" />
     <div id="right">
+        <eq name="$use.user_where" value="重庆店">重庆店</eq>
         <form name="form" method="post" action="/index.php/Home/admin/edituser" onsubmit="return checkform()">
         <table class="goods_table">
             <input type="hidden" name="uid" value="{$user.uid}">
-            <tr><td>收银员名：</td><td><input type="text" name="user_name" value="{$user.user_name}" required="required"></td></tr>
-            <tr><td>登陆密码：</td><td><input type="text" name="password"></td></tr>
-            <tr><td>联系电话：</td><td><input type="text" name="tel" value="{$user.tel}" required="required"></td></tr>
-            <tr><td>所在门店：</td><td><input type="text" name="user_where" value="{$user.user_where}" required="required"></td></tr>
+            <tr><td>收银员名：</td><td><input class="form-control" type="text" name="user_name" value="{$user.user_name}" required="required"></td></tr>
+            <tr><td>登陆密码：</td><td><input class="form-control" type="text" name="password"></td></tr>
+            <tr><td>联系电话：</td><td><input class="form-control" type="text" name="tel" value="{$user.tel}" required="required"></td></tr>
+            <tr><td>所在门店：</td><td><input class="form-control" type="text" name="user_where" value="{$user.user_where}" required="required"></td></tr>
             <tr><td>退票权限：</td><td>
                 <select name="permission">
                     <if condition="$user.permission eq 0"></if>
                     <option <if condition="$user.permission eq 0">selected="selected"</if> value="0">否</option>
-                    <option <if condition="$user.permission eq 1">selected="selected"</if> value="1">是</option>
+                    <option <if condition="$user.permission gt 0">selected="selected"</if> value="1">是</option>
                 </select>
             </td></tr>
-            <tr><td colspan="2"><input style="margin-left: 50px;margin-right: 10px;margin-top: 10px;" class="formbtn" type="submit" name="dosubmit" value="提交"><input class="formbtn" type="reset" value="重置"></td></tr>
+
+            <tr><td>分店管理：</td><td>
+                <select name="admin">
+                    <if condition="$user.permission eq 0"></if>
+                    <option <if condition="$user.permission lt 2">selected="selected"</if> value="0">否</option>
+                    <option <if condition="$user.permission egt 2">selected="selected"</if> value="1">是</option>
+                </select>
+            </td></tr>
+            <tr><td colspan="2">
+                <div style="margin-top: 10px">
+                    <input style="margin-left: 50px;margin-right: 10px;" class="btn btn-primary" type="submit" name="dosubmit" value="提交"><input class="btn btn-primary" type="reset" value="重置">
+                </div>
+            </td></tr>
         </table>
         </form>
     </div>

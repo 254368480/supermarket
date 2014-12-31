@@ -37,11 +37,11 @@
                 <option value="2">部分退货</option>
                 <option value="3">整单退货</option>
             </select>
-                <input type="text" name="user" placeholder="请输入员工姓名">
-                <input type="text" name="shop_name" placeholder="请输入门店名称">
+                <input type="text" value="{$user}" name="user" placeholder="请输入员工姓名">
+                <input type="text" value="{$shop_name}" name="shop_name" placeholder="请输入门店名称">
 
-                日期：<input class="date" type="text" name="start" placeholder="{$time}">
-                至：<input class="date" type="text" name="end" placeholder="{$time}">
+                日期：<input value="{$start}" class="date" type="text" name="start" placeholder="{$time}">
+                至：<input value="{$end}" class="date" type="text" name="end" placeholder="{$time}">
                 <input type="submit" class="formbtn" value="搜索">
             </form>
         </div>

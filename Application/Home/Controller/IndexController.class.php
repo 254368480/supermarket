@@ -5,6 +5,8 @@ header("Content-type: text/html; charset=utf-8");
 class IndexController extends Controller {
     public function index(){
         $this->_isLogin();
+        $goods_where = session('user_where');
+        echo $goods_where;
         if(IS_GET && I('get.act') == 're'){
             session('goods', null);
             session('money', null);
@@ -13,7 +15,7 @@ class IndexController extends Controller {
         if(IS_POST){
             $goods_number = $this->_checkinput(I('post.goods_number', null));
             if(!empty($goods_number)) {
-                $goods = $Goods->where("goods_number = '$goods_number'")->find();
+                $goods = $Goods->where("goods_number = '$goods_number' AND `goods_where` = '$goods_where'")->find();
                 if (!empty($goods)) {
                     $n = 1;
                     $sgoods = session('goods');
@@ -112,6 +114,7 @@ class IndexController extends Controller {
 
     public function jiesuan(){
         $this->_isLogin();
+        $goods_where = session('user_where');
         if(IS_POST){
             $goods_number = I('post.goods_number');
             $goods_name = I('post.goods_name');
@@ -169,7 +172,7 @@ class IndexController extends Controller {
                 );
                 $Logs_goods->add($data);
                 //从库存中减去
-                $Goods->where("goods_number = $goods_number[$i]")->setDec('goods_stock',$goods_num[$i]);
+                $Goods->where("goods_number = $goods_number[$i] AND `goods_where` = '$goods_where'")->setDec('goods_stock',$goods_num[$i]);
             }
             session('goods', null); //清除商品缓存
             session('money', null);
