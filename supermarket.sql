@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: 2014-12-21 08:46:14
+-- Generation Time: 2014-12-31 09:03:29
 -- 服务器版本： 5.6.17
 -- PHP Version: 5.5.12
 
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `super_cashlogs` (
   `buyer` char(15) COLLATE utf8mb4_bin NOT NULL,
   `state` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=9 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=14 ;
 
 --
 -- 转存表中的数据 `super_cashlogs`
@@ -69,7 +69,10 @@ INSERT INTO `super_cashlogs` (`id`, `logs_number`, `user_name`, `user_where`, `t
 (5, '1005201412210003', '员工A', '北京店', 1419147171, 1501, 1501, 1501, 'tianwei', 0),
 (6, 'TH1005201412210003', 'superadmin', '北京店', 1419147194, -1301, -1301, -1301, 'tianwei', 2),
 (7, '2000201412210004', '员工A', '上海店', 1419147491, 1201, 1201, 1201, 'tianwei', 0),
-(8, 'TH2000201412210004', 'superadmin', '上海店', 1419147545, -100, -100, 0, 'tianwei', 2);
+(8, 'TH2000201412210004', 'superadmin', '上海店', 1419147545, -100, -100, 0, 'tianwei', 2),
+(9, '1005201412220001', '员工A', '北京店', 1419234236, 1101, 1101, 1101, 'tianwei', 0),
+(10, '1005201412310001', '员工A', '北京店', 1420011587, 500, 500, 500, 'tianwei', 0),
+(13, 'TH1005201412310001', 'superadmin', '北京店', 1420012610, -500, -500, 0, 'tianwei', 3);
 
 -- --------------------------------------------------------
 
@@ -91,7 +94,7 @@ CREATE TABLE IF NOT EXISTS `super_cashlogs_goods` (
   `buyer` varchar(20) COLLATE utf8mb4_bin NOT NULL,
   `time` int(10) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=34 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=40 ;
 
 --
 -- 转存表中的数据 `super_cashlogs_goods`
@@ -130,7 +133,11 @@ INSERT INTO `super_cashlogs_goods` (`id`, `cid`, `logs_number`, `goods_number`, 
 (30, 7, '2000201412210004', '00001', '商品AAAA', 100, 100, 1, '员工A', '上海店', 'tianwei', 1419147491),
 (31, 7, '2000201412210004', '00002', '商品B', 1001, 1001, 1, '员工A', '上海店', 'tianwei', 1419147491),
 (32, 7, '2000201412210004', '00003', '商品C', 100, 100, 1, '员工A', '上海店', 'tianwei', 1419147491),
-(33, 8, 'TH2000201412210004', '00001', '商品AAAA', 100, 100, -1, 'superadmin', '上海店', 'tianwei', 1419147545);
+(33, 8, 'TH2000201412210004', '00001', '商品AAAA', 100, 100, -1, 'superadmin', '上海店', 'tianwei', 1419147545),
+(34, 9, '1005201412220001', '00002', '商品B', 1001, 1001, 1, '员工A', '北京店', 'tianwei', 1419234237),
+(35, 9, '1005201412220001', '00003', '商品C', 100, 100, 1, '员工A', '北京店', 'tianwei', 1419234237),
+(36, 10, '1005201412310001', '55', '商品FFF', 100, 100, 5, '员工A', '北京店', 'tianwei', 1420011587),
+(39, 13, 'TH1005201412310001', '55', '商品FFF', 100, 100, -5, 'superadmin', '北京店', 'tianwei', 1420012610);
 
 -- --------------------------------------------------------
 
@@ -140,28 +147,30 @@ INSERT INTO `super_cashlogs_goods` (`id`, `cid`, `logs_number`, `goods_number`, 
 
 CREATE TABLE IF NOT EXISTS `super_goods` (
   `gid` int(11) NOT NULL AUTO_INCREMENT,
+  `goods_where` varchar(50) COLLATE utf8mb4_bin NOT NULL,
   `goods_number` varchar(30) COLLATE utf8mb4_bin NOT NULL,
   `goods_name` varchar(30) COLLATE utf8mb4_bin NOT NULL,
   `goods_money` int(11) NOT NULL,
   `goods_int` int(11) NOT NULL,
   `goods_stock` int(11) NOT NULL,
-  PRIMARY KEY (`gid`),
-  UNIQUE KEY `goods_number` (`goods_number`),
-  KEY `goods_number_2` (`goods_number`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=35 ;
+  PRIMARY KEY (`gid`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=39 ;
 
 --
 -- 转存表中的数据 `super_goods`
 --
 
-INSERT INTO `super_goods` (`gid`, `goods_number`, `goods_name`, `goods_money`, `goods_int`, `goods_stock`) VALUES
-(6, '00006', '商品F', 100, 100, 105),
-(5, '00005', '商品E', 100, 100, 100),
-(4, '00004', '商品D', 100, 100, 110),
-(3, '00003', '商品C', 100, 100, 97),
-(2, '00002', '商品B', 1001, 1001, 95),
-(1, '00001', '商品AAAA', 100, 100, 111),
-(15, '00008', '商品8', 800, 50, 99);
+INSERT INTO `super_goods` (`gid`, `goods_where`, `goods_number`, `goods_name`, `goods_money`, `goods_int`, `goods_stock`) VALUES
+(6, '北京店', '00006', '商品F', 100, 100, 105),
+(5, '', '00005', '商品E', 100, 100, 100),
+(4, '', '00004', '商品D', 100, 100, 110),
+(3, '', '00003', '商品C', 100, 100, 96),
+(2, '', '00002', '商品B', 1001, 1001, 94),
+(1, '', '00001', '商品AAAA', 100, 100, 111),
+(15, '北京店', '00008', '商品8', 800, 50, 99),
+(35, '重庆店', '00009', '商品A', 100, 100, 100),
+(38, '武昌店', '55', '商品FFF', 100, 100, 100),
+(37, '北京店', '55', '商品FFF', 100, 100, 110);
 
 -- --------------------------------------------------------
 
@@ -208,7 +217,7 @@ CREATE TABLE IF NOT EXISTS `super_user` (
   PRIMARY KEY (`uid`),
   UNIQUE KEY `user_name` (`user_name`),
   KEY `user_name_2` (`user_name`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=9 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=11 ;
 
 --
 -- 转存表中的数据 `super_user`
@@ -216,12 +225,14 @@ CREATE TABLE IF NOT EXISTS `super_user` (
 
 INSERT INTO `super_user` (`uid`, `user_name`, `password`, `tel`, `user_where`, `permission`) VALUES
 (1, 'superadmin', 'ec8905987b99c70a577510deb2e4e66f', '15102754945', '', 9),
-(3, '员工A', 'ec8905987b99c70a577510deb2e4e66f', '15102754945', '中山店', 1),
+(3, '员工A', 'ec8905987b99c70a577510deb2e4e66f', '15102754945', '重庆店', 2),
 (4, '员工B', 'ec8905987b99c70a577510deb2e4e66f', '15102754945', '', 0),
 (5, '员工C', 'ec8905987b99c70a577510deb2e4e66f', '15102754945', '', 0),
 (6, '员工D', 'ec8905987b99c70a577510deb2e4e66f', '15102754945', '', 0),
 (7, '员工AA', 'ec8905987b99c70a577510deb2e4e66f', '15102754945', '武汉店', 0),
-(8, '员工AAB', 'ec8905987b99c70a577510deb2e4e66f', '15102754945', '中山店', 1);
+(8, '员工AAB', 'ec8905987b99c70a577510deb2e4e66f', '15102754945', '中山店', 1),
+(9, '员工AAA', 'ec8905987b99c70a577510deb2e4e66f', '15102754945', '北京店', 2),
+(10, '员工AAAA', 'ec8905987b99c70a577510deb2e4e66f', '15102754945', '上海店', 2);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
