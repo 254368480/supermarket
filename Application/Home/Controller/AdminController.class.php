@@ -60,17 +60,17 @@ class AdminController extends Controller {
         }else{
             $where = "goods_where = '$goods_where'";
         }
-        if(IS_POST){
-            $goods_number = I('post.goods_number', '');
+        if(IS_GET){
+            $goods_number = I('get.goods_number', '');
             if (!empty($goods_number)) {
-                $where.= " AND goods_number = $goods_number";
+                $where.= " AND goods_number = '$goods_number'";
             }
             $this->assign('goods_number', $goods_number);
         }
-        $count = $Goods->count($where);
+        $count = $Goods->where($where)->count();
         $Page = new \Think\Page($count,20);
         $show = $Page->show();// 分页显示输出
-        $goods = $Goods->where($where)->order('goods_number desc')->limit($Page->firstRow.','.$Page->listRows)->select();
+        $goods = $Goods->where($where)->order('goods_where desc, goods_number desc')->limit($Page->firstRow.','.$Page->listRows)->select();
         $arr = array(
             'title' => '商品管理_零乐购商超',
             'nav' => '0',
@@ -82,6 +82,8 @@ class AdminController extends Controller {
         $this->assign($arr);
         $this->display();
     }
+
+
 
     public function editgoods(){
         $this->_isLogin();
@@ -143,6 +145,11 @@ class AdminController extends Controller {
             }else{
                 $this->error("未定义操作！");
             }
+        }elseif(IS_POST){
+            $gids = I('post.id');
+            $gids = implode(',' ,$gids);
+            if($Goods->where("gid in($gids)")->delete())$this->success("删除成功！");
+            else $this->error("删除失败！");
         }else{
             $this->error("未定义操作！");
         }
@@ -197,7 +204,7 @@ class AdminController extends Controller {
         $count = $User->count();
         $Page = new \Think\Page($count,20);
         $show = $Page->show();// 分页显示输出
-        $users = $User->where('permission != 9')->order('uid')->limit($Page->firstRow.','.$Page->listRows)->select();
+        $users = $User->where()->order('uid')->limit($Page->firstRow.','.$Page->listRows)->select();
         $permission = array('否', '是', '是');
         $admin = array('否', '否', '是');
         $arr = array(
@@ -233,9 +240,9 @@ class AdminController extends Controller {
             if($User->where("uid = $uid")->count()){
                 $data = array(
                     'user_name' => $user_name,
-                    'user_where' => $user_where,
+                    'user_where' => $uid != 1 ? $user_where : '管理员',
                     'tel' => $tel,
-                    'permission' => $permission
+                    'permission' => $uid != 1 ? $permission : 9,
                 );
                 if(!empty($password)){
                     $data['password'] = md5($password);
@@ -400,12 +407,12 @@ class AdminController extends Controller {
     public function viewlogs(){
         $this->_isLogin();
         if(session('permission') != 9)$this->error('无此权限！');
-        if(IS_POST){
-            $user = I('post.user');
-            $shop_name = I('post.shop_name');
-            $state = I('post.state');
-            $start = I('post.start', '', 'strtotime');
-            $end = I('post.end', '', 'strtotime');
+        if(IS_GET){
+            $user = $this->_checkinput(I('get.user'));
+            $shop_name = $this->_checkinput(I('get.shop_name'));
+            $state = $this->_checkinput(I('get.sta'));
+            $start = $this->_checkinput(I('get.start', '', 'strtotime'));
+            $end = $this->_checkinput(I('get.end', '', 'strtotime'));
             if($start > $end)$this->error('起始时间不能大于结束时间，请重新输入！');
             if($start && $end)$end = $end + 60*60*24-1;
             $where = array(
@@ -414,7 +421,7 @@ class AdminController extends Controller {
                 $state != '' ? "state = '$state'" : "1=1",
                 $start && $end ? "time > $start AND time < $end" : "1=1"
             );
-            $this->assign($_POST);
+            $this->assign($_GET);
         }else {
             $Y = date('Y', time());
             $m = date('m', time());
@@ -427,7 +434,7 @@ class AdminController extends Controller {
         $count = $Logs->where($where)->count();
         $Page = new \Think\Page($count,20);
         $show = $Page->show();// 分页显示输出
-        $logs = $Logs->where($where)->order('logs_number asc')->limit($Page->firstRow.','.$Page->listRows)->select();
+        $logs = $Logs->where($where)->order('time desc')->limit($Page->firstRow.','.$Page->listRows)->select();
         $time = date('Y-m-d', time());
         $state = array('现金交易', '刷卡交易', '部分退货', '整单退货');
         $arr = array(
@@ -615,7 +622,7 @@ class AdminController extends Controller {
             }
             $data_values = '';
             for ($i = 1; $i < $len_result; $i++) { //循环获取各字段值
-                $goods_number = iconv('gb2312', 'utf-8', $result[$i][0]); //中文转码
+                $goods_number = trim(iconv('gb2312', 'utf-8', $result[$i][0])); //中文转码
                 $goods_name = iconv('gb2312', 'utf-8', $result[$i][1]);
                 $goods_money = $result[$i][2];
                 $goods_int = $result[$i][3];

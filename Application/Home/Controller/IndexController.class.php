@@ -5,18 +5,19 @@ header("Content-type: text/html; charset=utf-8");
 class IndexController extends Controller {
     public function index(){
         $this->_isLogin();
-        $goods_where = session('user_where');
-        echo $goods_where;
+        //放弃本次交易
         if(IS_GET && I('get.act') == 're'){
             session('goods', null);
             session('money', null);
         }
+        $goods_where = session('user_where');
         $Goods = M('Goods');
         if(IS_POST){
             $goods_number = $this->_checkinput(I('post.goods_number', null));
             if(!empty($goods_number)) {
                 $goods = $Goods->where("goods_number = '$goods_number' AND `goods_where` = '$goods_where'")->find();
                 if (!empty($goods)) {
+                    $goods['goods_number'] = trim($goods['goods_number']);
                     $n = 1;
                     $sgoods = session('goods');
                     foreach($sgoods as $key => $value){
@@ -124,7 +125,6 @@ class IndexController extends Controller {
             $itotal = I('post.itotal');
             $mtotal = I('post.mtotal');
             $money = I('post.money');
-            $zmoney = I('post.zmoney');
             $buyer = I('post.buyer');
             $user_name = session('user_name');
             $user_where = session('user_where');

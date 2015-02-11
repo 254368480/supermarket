@@ -13,6 +13,7 @@
             var money = document.form.goods_money;
             var int = document.form.goods_int;
             var stock = document.form.goods_stock;
+            var where = document.form.goods_where;
 
             if(!checkinput(number, 'req', '请输入商品编号！')){
                 return false;
@@ -38,6 +39,11 @@
             if(!checkinput(stock, 'int', '商品库存必须为数字！')){
                 return false;
             }
+            <if condition="($permission eq 9)">
+                if(!checkinput(where, 'req', '请选择门店！')){
+                    return false;
+                }
+            </if>
         }
     </script>
 </head>
