@@ -14,7 +14,9 @@
     <include file="nav_left" />
     <div id="right">
         <form method="get" style="float: left;margin-top: 30px;margin-left: 50px" action="/index.php/Home/admin/viewgoods">
-            <input type="text" value="{$goods_number}" name="goods_number" placeholder="输入商品编号"><input class="formbtn"  type="submit" value="搜索">
+            <input type="text" value="{$goods_number}" name="goods_number" placeholder="输入商品编号">
+            <input type="text" value="{$goods_name}" name="goods_name" placeholder="输入商品名称">
+            <input class="formbtn"  type="submit" value="搜索">
         </form>
 
         <a href="/index.php/Home/admin/downloadgoods" class="formbtn" style="display: block;text-align: center;float: left;margin-top: 30px;margin-left: 30px">导出商品</a>

@@ -1,4 +1,5 @@
 $(document).ready(function(){
+
     $("#inputmoney").blur(function(){
         var money = $('#money').find("input").val();
         var ymoney = $('#ymoney').find("input").val();
@@ -31,8 +32,48 @@ $(document).ready(function(){
     });
 
 });
-function payint(obj){
-    $('span.buyer').siblings('input.formbtn').hide();
-    var buyer = $('span.buyer').find('input').val();
-    $('span.buyer').html('<input type="text" name="buyer" value="'+buyer+'"><input type="hidden" name="buyer" value="'+buyer+'" form="cash_form">');
+function payint(){
+    var touser = $("input[tw=touser]").val();
+    var itotal = $("input[tw=itotal]").val();
+    var buyer = $("input[tw=buyer]").val();
+    var pw = $("input[tw=pw]").val();
+    checkre(buyer, '支付用户为空！');
+    checkre(pw, '密码为空！');
+
+    $.post('/index.php/Home/index/payint', {
+        touser:touser,
+        itotal:itotal,
+        buyer:buyer,
+        pw:pw
+    }, function(data,status){
+        $("input[tw=result]").val(data);
+        if(data == '支付成功！') {
+            $("button[tw=btn]").attr("disabled", true);
+        }
+    });
 }
+
+function checkre(val, ms){
+    if(val == ''){
+        alert(ms);
+        return false;
+    }
+}
+
+function check(){
+    var ymoney = $('input[tw=ymoney]').val();
+    var money = $('input[tw=money]').val();
+    var result = $('input[tw=result]').val();
+    if(money < ymoney){
+        alert('支付金额不足！');
+        return false;
+    }
+    if(result != '支付成功！'){
+        alert('积分尚未支付成功！');
+        return false;
+    }
+    return true;
+}
+
+
+

@@ -62,15 +62,20 @@ class AdminController extends Controller {
         }
         if(IS_GET){
             $goods_number = I('get.goods_number', '');
+            $goods_name = I('get.goods_name', '');
             if (!empty($goods_number)) {
                 $where.= " AND goods_number = '$goods_number'";
             }
+            if(!empty($goods_name)){
+                $where.= " AND goods_name like '%$goods_name%'";
+            }
             $this->assign('goods_number', $goods_number);
+            $this->assign('goods_name', $goods_name);
         }
         $count = $Goods->where($where)->count();
         $Page = new \Think\Page($count,20);
         $show = $Page->show();// 分页显示输出
-        $goods = $Goods->where($where)->order('goods_where desc, goods_number desc')->limit($Page->firstRow.','.$Page->listRows)->select();
+        $goods = $Goods->where($where)->order('goods_stock desc')->limit($Page->firstRow.','.$Page->listRows)->select();
         $arr = array(
             'title' => '商品管理_零乐购商超',
             'nav' => '0',

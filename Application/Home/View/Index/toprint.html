@@ -3,6 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>{$title}</title>
+    <link rel="stylesheet" href="/Public/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="/Public/index/css/style.css">
     <style>
         @media print {
@@ -11,9 +12,9 @@
     </style>
 </head>
 
-<body>
+<body style="background-color: #fff;font-size: 12px">
     <div class="print_body">
-        <table width="200" style="margin-top: 30px">
+        <table width="240" style="margin-top: 30px">
             <tr><td>门店：{$log.user_where}</td><td>收银员：{$user_name}</td></tr>
             <tr><td colspan="2">日期：{$log.time|date="Y-m-d H:i:s",###}</td></tr>
             <tr><td colspan="2">票号：{$log.logs_number}</td></tr>

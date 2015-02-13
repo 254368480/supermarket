@@ -47,12 +47,16 @@ class IndexController extends Controller {
             $goods[$key]['mcount'] = $mcount;
             $goods[$key]['icount'] = $icount;
         }
+        $shop_mod = M('Shops');
+        $touser = $shop_mod->where("shop_name = '$goods_where'")->getField('shop_user');
+        if(empty($touser))$this->error('该门店收积分账号不存在！');
         $arr = array(
                 'title' => '收银_零乐购商超',
                 'user_name' => session('user_name'),
                 'mtotal' => $mtotal,
                 'itotal' => $itotal,
                 'goods' => $goods,
+                'touser' => $touser,
                 'money' => session('money') ? session('money') : null,
                 'user_where' => session('user_where'),
                 'permission' => session('permission'),
@@ -92,7 +96,7 @@ class IndexController extends Controller {
         exit;
     }
 
-    public function payint(){
+    /*public function payint(){
         $this->_isLogin();
         if(IS_POST){
             $buyer = I('post.buyer');
@@ -111,6 +115,26 @@ class IndexController extends Controller {
             $this->assign($arr);
             $this->display();
         }
+    }*/
+
+    public function payint(){
+        $this->_isLogin();
+        if(IS_POST){
+            $buyer = I('post.buyer');
+            $itotal = I('post.itotal');
+            $pw = I('post.pw');
+            $touser = I('post.touser');
+
+            $data = array(
+                'buyer' => $buyer,
+                'itotal' => $itotal,
+                'pw' => $pw,
+                'touser' => $touser,
+            );
+            $url = "http://www.linglegou.com/index.php?act=payintapiv1";
+            echo iconv('gbk', 'utf-8', $this->post($url, $data));
+            exit;
+        }
     }
 
     public function jiesuan(){
@@ -126,12 +150,14 @@ class IndexController extends Controller {
             $mtotal = I('post.mtotal');
             $money = I('post.money');
             $buyer = I('post.buyer');
+            $result = I('post.result');
             $user_name = session('user_name');
             $user_where = session('user_where');
             $len = count($goods_number);
 
             if(empty($buyer))$this->error('请输入购买用户！');
             if($money == '')$this->error('请输入实收金额！');
+            if($result != '支付成功！')$this->error('积分尚未支付成功，不能结算！');
 
             $Shops = M('Shops');
             $shop = $Shops->where("shop_name = '$user_where'")->find();
@@ -279,6 +305,31 @@ class IndexController extends Controller {
         $data = stripslashes($data);
         $data = htmlspecialchars($data);
         return $data;
+    }
+
+    public function post($url, array $post = array(), array $options = array())
+    {
+        $defaults = array(
+            CURLOPT_POST => 1,
+            CURLOPT_HEADER => 0,
+            CURLOPT_URL => $url,
+            CURLOPT_FRESH_CONNECT => 1,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_FORBID_REUSE => 1,
+            CURLOPT_CONNECTTIMEOUT => 1,
+            CURLOPT_TIMEOUT => 4,
+            CURLOPT_VERBOSE => true,
+            CURLOPT_POSTFIELDS => http_build_query($post)
+        );
+
+        $ch = curl_init();
+        curl_setopt_array($ch, ($options + $defaults));
+        if (!$result = curl_exec($ch)) {
+            error_log(curl_errno($ch).curl_error($ch)."\n".var_export(curl_getinfo($ch), 1));
+        }
+
+        curl_close($ch);
+        return $result;
     }
 
     //验证码

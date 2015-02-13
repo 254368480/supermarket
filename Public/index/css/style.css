@@ -1,8 +1,5 @@
-*{padding: 0;margin: 0}
-body{font-size: 12px;line-height: 1.5em;font-family: "微软雅黑";}
+body{font-family: "微软雅黑";}
 .cash_body{background-color: #000;color: #333}
-ul,li{list-style-type: none;}
-a{text-decoration: none;color: #333}
 .headbg{
     background-color: #ccc;
     width: 100%;
@@ -43,7 +40,7 @@ a{text-decoration: none;color: #333}
 }
 .total{
     float: left;
-    margin-bottom: 30px;
+    margin-left: 100px;
 }
 .clear{
     clear: both;
@@ -60,26 +57,24 @@ a{text-decoration: none;color: #333}
     background-color: #e6f1fc;
 }
 #cash_form{
-   height: 300px;
+   min-height: 400px;
    border:1px solid #ccc;
 }
 .cash_head{
-    height: 30px;
-    line-height: 30px;
+    height: 46px;
+    line-height: 46px;
     background-color: #d5e7f7;
     padding-left: 5px;
     padding-right: 5px;
 }
+.print_body{
+    margin-left: 5px;
+}
 .print_body th{
     text-align: left;
 }
-.payint h1{
-    height: 50px;
-    line-height: 50px;
-}
-.payint td{
-    height: 20px;
-    line-height: 20px;
+.payint{
+    float: left;
 }
 .cash{
     border: 1px solid #ccc;
@@ -90,4 +85,38 @@ a{text-decoration: none;color: #333}
     border: 5px solid #ccc;
     background-color: #fff;
 }
+.inline{
+    display: inline-block;
+}
+.width150{
+    width: 150px;
+}
+.width80{
+    width: 80px;
+}
+.height30{
+    height: 30px;
+    line-height: 30px;
+}
+.total .form-group{
+    margin-bottom: 5px;
+}
+.payint .form-group{
+    margin-bottom: 5px;
+}
+.cash .form-control{
+    height: 30px;
+    line-height: 30px;
+}
+body{
+    background-color: #000;
+}
+.center{
+    background-color: #fff;
+    height: 100%;
+}
+.table tr{
+    background-color: #e6f1fc;;
+}
+
 

@@ -3,31 +3,53 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>{$title}</title>
+    <link rel="stylesheet" href="/Public/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="/Public/index/css/style.css">
     <script src="/Public/admin/js/jquery.js"></script>
+    <script src="/Public/index/js/angular.js"></script>
     <script src="/Public/index/js/index.js"></script>
+    <script>
+        function personController($scope) {
+            $scope.index = {
+                ymoney:{$mtotal},
+                smoney:0,
+                zmoney: function() {
+                    var x = $scope.index;
+                    return x.smoney - x.ymoney;
+                }
+            };
+        }
+    </script>
 </head>
 
-<body class="cash_body">
-    <div class="cashbg">
-    <div class="center">
+<body>
+    <div class="container-fluid">
+        <div class="row">
+        <div class="center">
         <div class="cash_head">
             <form class="cashform" action="/index.php/Home/index/index" method="post">
-            商品编号/条形码：<input type="text" name="goods_number" autofocus="autofocus">
+                <label style="margin-bottom: 0" class="control-label">商品编号/条形码：</label>
+                <input class="inline form-control width150" type="text" name="goods_number" autofocus="autofocus">
             </form>
-            <div style="float:right;font-size: 14px">
-                <if condition="$permission egt 1">
-                <a target="_blank"  href="/index.php/home/admin/editlog">退单操作</a> |</if> <a href="/index.php/Home/index/index/act/re">放弃交易</a> | <a  href="/index.php/Home/index/logout">退出交班</a></div>
-            <div style="float:right;margin-right: 50px;font-size: 14px">收银员：{$user_name}</div>
-            <div style="float:right;margin-right: 50px;font-size: 14px">门店：{$user_where}</div>
+            <div style="float: right;font-size: 14px">
+                <div style="float:left;margin-right: 50px">门店：{$user_where}</div>
+                <div style="float:left;margin-right: 50px">收银员：{$user_name}</div>
+                <div style="float:left;">
+                    <if condition="$permission egt 1">
+                    <a target="_blank"  href="/index.php/home/admin/editlog">退单操作</a> |</if> <a href="/index.php/Home/index/index/act/re">放弃交易</a> | <a  href="/index.php/Home/index/logout">退出交班</a>
+                </div>
+            </div>
 
         </div>
         <div class="clear"></div>
-        <form method="post" action="/index.php/Home/index/jiesuan" id="cash_form">
-            <table width="1000px" border="1" cellspacing="0" cellpadding="0" class="goods_table">
+        <form method="post" action="/index.php/Home/index/jiesuan" id="cash_form" name="cash_form" onsubmit="return check()">
+            <table class="table">
+                <thead>
                 <tr>
-                    <th width="400px">商品名称</th><th>商品价格</th><th>商品积分</th><th width="80px">商品数量</th><th>金额小计</th><th>积分小计</th>
+                    <th align="center">商品名称</th><th>商品价格</th><th>商品积分</th><th>商品数量</th><th>金额小计</th><th>积分小计</th>
                 </tr>
+                </thead>
+                <tbody>
                 <foreach name="goods" item="value">
                     <if condition="$value.goods_num gt 0">
                         <tr>
@@ -37,30 +59,63 @@
                             <input type="hidden" name="goods_int[]" value="{$value.goods_int}">
                             <input type="hidden" name="mcount[]" value="{$value.mcount}">
                             <input type="hidden" name="icount[]" value="{$value.icount}">
-                            <td align="center">{$value.goods_name}</td>
-                            <td align="center" class="goods_money">{$value.goods_money}</td>
-                            <td align="center" class="goods_int">{$value.goods_int}</td>
-                            <td align="center" class="goods_num"><input style="width: 30px;background-color: #e6f1fc;border: none;text-align: center" type="text" name="goods_num[]" value="{$value.goods_num}" required="required"></td>
-                            <td align="center" class="mcount">{$value.mcount}</td>
-                            <td align="center" class="icount">{$value.icount}</td>
+                            <td>{$value.goods_name}</td>
+                            <td class="goods_money">{$value.goods_money}</td>
+                            <td class="goods_int">{$value.goods_int}</td>
+                            <td class="goods_num"><input style="height: 24px;line-height: 24px;padding: 0;width: 60px;text-align: center" class="form-control width80 inline" type="text" name="goods_num[]" value="{$value.goods_num}" required="required"></td>
+                            <td class="mcount">{$value.mcount}</td>
+                            <td class="icount">{$value.icount}</td>
                         </tr>
                     </if>
                 </foreach>
+                </tbody>
             </table>
         </form>
         <div class="cash">
-            <div class="total">
-                所需积分：<input type="hidden" class="itotal" name="itotal" value="{$itotal}" form="cash_form"><span class="itotal">{$itotal}</span><br>
-                应收金额：<span id="ymoney"><input type="hidden" name="mtotal" value="{$mtotal}" form="cash_form">{$mtotal}</span><br>
-                实收金额：<span id="money"><input id="inputmoney" autocomplete="off" value="{$money}" type="text" style="width:40px;height: 18px;" name="money" required="required"></span><br>
-                找    零：<span id="zmoney"></span><br>
+            <div class="payint">
+                <div><a style="font-size: 16px">支付积分</a></div>
+                <input type="hidden" tw="touser" value="{$touser}">
+                <div class="form-group">
+                    <label class="control-label">支付积分：</label>
+                    <input class="form-control width150 inline" type="text" tw="itotal" value="{$itotal}" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">支付用户：</label>
+                    <input class="form-control width150 inline" name="buyer" type="text" tw="buyer" form="cash_form" required>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">登陆密码：</label>
+                    <input class="form-control width150 inline" type="password" tw="pw" required>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">支付结果：</label>
+                    <input class="form-control inline width150" type="text" name="result" tw="result" value="还未支付" form="cash_form" readonly>
+                </div>
+                <button tw="btn" class="btn btn-primary" onclick="payint()" style="width: 225px">支付积分</button>
+            </div>
+            <div class="total"  ng-app="" ng-controller="personController">
+
+                <div><a style="font-size: 16px">金额结算</a></div>
+                <div class="form-group">
+                    <label class="control-label">所需积分：</label>
+                    <input type="text" class="form-control inline width80" name="itotal" value="{$itotal}" form="cash_form" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">应收金额：</label>
+                    <input type="text" ng-model="index.ymoney" class="form-control inline width80" tw="ymoney" name="mtotal" value="{$mtotal}" form="cash_form" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> 实收金额：</label>
+                    <input type="text" ng-model="index.smoney" class="form-control inline width80" tw="money" autocomplete="off" name="money" form="cash_form" required="required">
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> 找零金额：</label>
+                    <input type="text" class="form-control inline width80" value="{{index.zmoney()}}" readonly>
+                </div>
+                <input style="width: 155px" type="submit" class="btn btn-primary width150" value="结算打印" form="cash_form">
             </div>
             <div class="clear"></div>
-            <form method="post" action="/index.php/Home/index/payint" target="_blank" onsubmit="payint()">
-                <span class="buyer"><input placeholder="输入用户后按回车进入支付积分页面" style="width: 180px;border: 1px solid #ccc" type="text" name="buyer" required="required"></span>
-                <input type="hidden" name="itotal" value="{$itotal}">
-            </form>
-            <input type="submit" style="margin-top: 10px" class="formbtn" value="结算打印" form="cash_form">
+        </div>
         </div>
     </div>
     </div>
